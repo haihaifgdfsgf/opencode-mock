@@ -1,4 +1,4 @@
-# 🧠 OpenCode-Mock 架构教学 Wiki
+# 🧠 OpenCode-Mock 架构教学 Wiki 
 
 > **目标读者**：AI 智能体开发新手
 > **学习目标**：理解一个最简单 多Agent 系统的核心机制，能读懂 opencode-mock 的代码、能动手修改实验
