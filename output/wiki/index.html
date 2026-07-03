@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WIKI</title>
+  <link rel="stylesheet" href="./wiki.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar-fill" id="progress"></div></div>
+
+<!-- ─── Sidebar ─── -->
+<nav class="sidebar">
+  <div class="sidebar-title">📚 目录</div>
+  <div class="nav-group">
+  <a class="nav-item chapter" href="#opencode-mock-架构教学-wiki">🧠 OpenCode-Mock 架构教学 Wiki</a>
+  <a class="nav-item" href="#目录">📑 目录</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-1-章-ai-agent-入门">🎓 第 1 章：AI Agent 入门</a>
+  <a class="nav-item" href="#1-1-什么是-ai-agent">1.1 什么是 AI Agent？</a>
+  <a class="nav-item" href="#1-2-为什么要多-agent">1.2 为什么要多 Agent？</a>
+  <a class="nav-item" href="#1-3-opencode-是什么">1.3 OpenCode 是什么？</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-2-章-认识-opencode-mock">🎓 第 2 章：认识 opencode-mock</a>
+  <a class="nav-item" href="#2-1-项目目标">2.1 项目目标</a>
+  <a class="nav-item" href="#2-2-真实-vs-mock">2.2 真实 vs Mock</a>
+  <a class="nav-item" href="#2-3-一句话总结项目架构">2.3 一句话总结项目架构</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-3-章-七大核心概念">🎓 第 3 章：七大核心概念</a>
+  <a class="nav-item" href="#3-1-agent-智能体">3.1 Agent（智能体）</a>
+  <a class="nav-item" href="#3-2-session-会话">3.2 Session（会话）</a>
+  <a class="nav-item" href="#3-2-1-sessionstore-会话存储服务">3.2.1 SessionStore（会话存储服务）</a>
+  <a class="nav-item" href="#3-2-2-上下文继承-子-agent-怎么-看到-父-agent-的思考">3.2.2 上下文继承：子 Agent 怎么&quot;看到&quot;父 Agent 的思考？</a>
+  <a class="nav-item" href="#3-3-react-循环-推理-行动">3.3 ReAct 循环（推理 + 行动）</a>
+  <a class="nav-item" href="#3-4-tool-工具">3.4 Tool（工具）</a>
+  <a class="nav-item" href="#3-5-task-工具-最特殊的一个">3.5 task 工具（最特殊的一个）</a>
+  <a class="nav-item" href="#3-6-messagebus-消息总线">3.6 MessageBus（消息总线）</a>
+  <a class="nav-item" href="#3-7-七个概念的关系图">3.7 七个概念的关系图</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-4-章-项目代码地图">🎓 第 4 章：项目代码地图</a>
+  <a class="nav-item" href="#4-1-文件总览">4.1 文件总览</a>
+  <a class="nav-item" href="#4-2-入口和配置层">4.2 入口和配置层</a>
+  <a class="nav-item" href="#4-3-核心机制层-最复杂">4.3 核心机制层（最复杂）</a>
+  <a class="nav-item" href="#4-4-mock-层">4.4 Mock 层</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-5-章-完整调用链路走读">🎓 第 5 章：完整调用链路走读</a>
+  <a class="nav-item" href="#5-1-启动阶段">5.1 启动阶段</a>
+  <a class="nav-item" href="#5-2-planner-第-1-轮-llm-调用">5.2 Planner 第 1 轮 LLM 调用</a>
+  <a class="nav-item" href="#5-3-执行-task-工具-启动产品经理">5.3 执行 task 工具（启动产品经理）</a>
+  <a class="nav-item" href="#5-4-产品经理-react-循环">5.4 产品经理 ReAct 循环</a>
+  <a class="nav-item" href="#5-5-planner-收到产品经理产出">5.5 Planner 收到产品经理产出</a>
+  <a class="nav-item" href="#5-6-planner-第-2-轮-llm-调用">5.6 Planner 第 2 轮 LLM 调用</a>
+  <a class="nav-item" href="#5-7-启动-ui-设计师">5.7 启动 UI 设计师</a>
+  <a class="nav-item" href="#5-8-ui-设计师第-1-轮-调-write-file">5.8 UI 设计师第 1 轮：调 write\_file</a>
+  <a class="nav-item" href="#5-9-执行-write-file-工具-真写文件">5.9 执行 write\_file 工具（真写文件）</a>
+  <a class="nav-item" href="#5-10-ui-设计师第-2-轮-返回摘要">5.10 UI 设计师第 2 轮：返回摘要</a>
+  <a class="nav-item" href="#5-11-planner-第-3-轮-输出汇总">5.11 Planner 第 3 轮：输出汇总</a>
+  <a class="nav-item" href="#5-12-全程调用次数统计">5.12 全程调用次数统计</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-5-5-章-session-父子树与上下文继承">🎓 第 5.5 章：Session 父子树与上下文继承</a>
+  <a class="nav-item" href="#5-5-1-最终形成的-session-树">5.5.1 最终形成的 Session 树</a>
+  <a class="nav-item" href="#5-5-2-落盘文件结构">5.5.2 落盘文件结构</a>
+  <a class="nav-item" href="#5-5-3-上下文继承流程-最关键的链路">5.5.3 上下文继承流程（最关键的链路）</a>
+  <a class="nav-item" href="#5-5-4-完整代码调用链">5.5.4 完整代码调用链</a>
+  <a class="nav-item" href="#5-5-5-防递归-子-session-为什么不能调-task">5.5.5 防递归：子 Session 为什么不能调 task</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-6-章-动手实验任务">🎓 第 6 章：动手实验任务</a>
+  <a class="nav-item" href="#实验-1-跑起来看输出-5-分钟">实验 1：跑起来看输出（5 分钟）</a>
+  <a class="nav-item" href="#实验-2-修改-planner-的-system-prompt-10-分钟">实验 2：修改 Planner 的 system prompt（10 分钟）</a>
+  <a class="nav-item" href="#实验-3-加一个新角色-30-分钟-推荐">实验 3：加一个新角色（30 分钟）⭐ 推荐</a>
+  <a class="nav-item" href="#实验-4-debug-一次失败-15-分钟">实验 4：debug 一次失败（15 分钟）</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-7-章-常见误区与进阶方向">🎓 第 7 章：常见误区与进阶方向</a>
+  <a class="nav-item" href="#7-1-新手最容易踩的-5-个坑">7.1 新手最容易踩的 5 个坑</a>
+  <a class="nav-item" href="#7-2-真实生产-vs-这个-mock-的差距">7.2 真实生产 vs 这个 mock 的差距</a>
+  <a class="nav-item" href="#7-3-你可以接着探索的方向">7.3 你可以接着探索的方向</a>
+</div>
+<div class="nav-group">
+  <a class="nav-item chapter" href="#第-8-章-openai-chat-completions-接口完全解析">🎓 第 8 章：OpenAI Chat Completions 接口完全解析</a>
+  <a class="nav-item" href="#8-1-一个接口走天下">8.1 一个接口走天下</a>
+  <a class="nav-item" href="#8-2-请求体-request-body">8.2 请求体（Request Body）</a>
+  <a class="nav-item" href="#8-3-响应体-response-body">8.3 响应体（Response Body）</a>
+  <a class="nav-item" href="#8-4-一次完整-react-循环的请求-响应时序">8.4 一次完整 ReAct 循环的请求/响应时序</a>
+  <a class="nav-item" href="#8-5-tools-字段定义-告诉-llm-有什么可用工具">8.5 `tools` 字段定义——告诉 LLM 有什么可用工具</a>
+  <a class="nav-item" href="#8-6-opencode-mock-的-mock-策略">8.6 opencode-mock 的 Mock 策略</a>
+  <a class="nav-item" href="#8-7-一张图总结">8.7 一张图总结</a>
+</div>
+
+</nav>
+
+<!-- ─── Main Content ─── -->
+<div class="main">
+<h1 id="opencode-mock-架构教学-wiki">🧠 OpenCode-Mock 架构教学 Wiki</h1>
+<blockquote>
+<p><strong>目标读者</strong>：AI 智能体开发新手
+<strong>学习目标</strong>：理解一个最简单 多Agent 系统的核心机制，能读懂 opencode-mock 的代码、能动手修改实验
+<strong>预计阅读时间</strong>：45 分钟 + 30 分钟动手</p>
+</blockquote>
+<hr>
+<h2 id="目录">📑 目录</h2>
+<table>
+<thead>
+<tr>
+<th>章节</th>
+<th>标题</th>
+<th>学完后你能回答的问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="#第-1-章-ai-agent-入门">第 1 章</a></td>
+<td>AI Agent 入门</td>
+<td>Agent 是什么？为什么要多 Agent？</td>
+</tr>
+<tr>
+<td><a href="#第-2-章-认识-opencode-mock">第 2 章</a></td>
+<td>认识 opencode-mock</td>
+<td>这个项目想模拟什么？它做了什么简化？</td>
+</tr>
+<tr>
+<td><a href="#第-3-章-七大核心概念">第 3 章</a></td>
+<td>七大核心概念</td>
+<td>Planner、Agent、Session、ReAct、Tool、Task、MessageBus、<strong>SessionStore</strong> 各自是什么？</td>
+</tr>
+<tr>
+<td><a href="#第-4-章-项目代码地图">第 4 章</a></td>
+<td>项目代码地图</td>
+<td>每个文件在哪个目录、干什么用的？</td>
+</tr>
+<tr>
+<td><a href="#第-5-章-完整调用链路走读">第 5 章</a></td>
+<td>完整调用链路走读</td>
+<td>从用户输入&quot;帮我设计登录页&quot;到 HTML 写盘，全程发生了什么？</td>
+</tr>
+<tr>
+<td><a href="#第-5-5-章-session-父子树与上下文继承">第 5.5 章</a></td>
+<td>Session 父子树与上下文继承</td>
+<td>Session 怎么形成层级？子 Agent 怎么&quot;看到&quot;父 Agent 的思考？</td>
+</tr>
+<tr>
+<td><a href="#第-6-章-动手实验任务">第 6 章</a></td>
+<td>动手实验任务</td>
+<td>怎么改一个 Agent？怎么加一个新角色？</td>
+</tr>
+<tr>
+<td><a href="#第-7-章-常见误区与进阶方向">第 7 章</a></td>
+<td>常见误区与进阶方向</td>
+<td>我容易踩什么坑？真实生产里还有什么？</td>
+</tr>
+<tr>
+<td><a href="#%E7%AC%AC-8-%E7%AB%A0-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%8E%A5%E5%8F%A3%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90">第 8 章</a></td>
+<td>大模型接口完全解析</td>
+<td>OpenAI Chat Completions 的入参出参长什么样？tool_calls 怎么用？</td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="第-1-章-ai-agent-入门">🎓 第 1 章：AI Agent 入门</h1>
+<h2 id="1-1-什么是-ai-agent">1.1 什么是 AI Agent？</h2>
+<p>最朴素的理解：</p>
+<blockquote>
+<p><strong>Agent = 一个能用工具、能自主决策的 AI 程序。</strong></p>
+</blockquote>
+<p>对比三种东西：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>类比</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>普通 LLM 调用</strong></td>
+<td>问答机器人</td>
+<td>你问一句，它答一句，结束</td>
+</tr>
+<tr>
+<td><strong>Agent</strong></td>
+<td>实习生</td>
+<td>你给个目标，它自己琢磨步骤、调工具、试错、最终交付</td>
+</tr>
+<tr>
+<td><strong>Multi-Agent 系统</strong></td>
+<td>项目团队</td>
+<td>多个实习生分工协作，每人负责自己擅长的部分</td>
+</tr>
+</tbody></table>
+<p>我们这个项目，就是一个<strong>最简 Multi-Agent 系统</strong>——一个&quot;小公司&quot;。</p>
+<h2 id="1-2-为什么要多-agent">1.2 为什么要多 Agent？</h2>
+<p>想象一下这个场景：用户说&quot;帮我设计一个登录页&quot;。</p>
+<p><strong>单 Agent 方案</strong>：一个全能型 AI</p>
+<ul>
+<li>既要会写产品需求文档（PRD）</li>
+<li>又要会设计界面、写 HTML/CSS/JS</li>
+<li>还要会测试、调样式</li>
+<li>prompt 越长越混乱，越容易&quot;啥都会但啥都不精&quot;</li>
+</ul>
+<p><strong>多 Agent 方案</strong>（opencode-mock 用的）：</p>
+<ul>
+<li><strong>产品经理 Agent</strong>：专门写 PRD，prompt 里只有&quot;你是产品经理&quot;那点事</li>
+<li><strong>UI 设计师 Agent</strong>：专门写 HTML，prompt 里只有&quot;你是设计师&quot;那点事</li>
+<li><strong>Planner Agent</strong>：不做具体工作，专门决定&quot;这个活儿派给谁&quot;</li>
+</ul>
+<p>每个 Agent 的 prompt 都<strong>短而专</strong>，效果更好维护也更容易。</p>
+<h2 id="1-3-opencode-是什么">1.3 OpenCode 是什么？</h2>
+<p><strong>OpenCode</strong> 是一个真实存在的开源 AI 编程助手（你可以在 GitHub 上找到它）。</p>
+<p>它的核心架构就是<strong>多 Agent 协作</strong>，里面有个角色叫 <strong>Sisyphus</strong>（西西弗斯，希腊神话里推石头上山的人），扮演的就是&quot;不停把任务派给别人&quot;的角色。</p>
+<p>我们的 <code>opencode-mock</code> 项目，就是用最简代码模拟 Sisyphus 的工作方式。</p>
+<hr>
+<h1 id="第-2-章-认识-opencode-mock">🎓 第 2 章：认识 opencode-mock</h1>
+<h2 id="2-1-项目目标">2.1 项目目标</h2>
+<blockquote>
+<p><strong>用约 ~500 行 Node.js 代码，演示一个真实多 Agent 系统的核心调度机制。</strong></p>
+</blockquote>
+<h2 id="2-2-真实-vs-mock">2.2 真实 vs Mock</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>真实 OpenCode</th>
+<th>opencode-mock</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LLM</td>
+<td>调用 GPT-4o / Claude API</td>
+<td>用 Mock 客户端返回预设答案</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>真实执行 bash、写文件、跑命令</td>
+<td>write_file 真实写文件，其他是 Mock</td>
+</tr>
+<tr>
+<td>Agent 数</td>
+<td>几十个</td>
+<td>3 个（Planner + 产品经理 + UI设计师）</td>
+</tr>
+<tr>
+<td>任务复杂度</td>
+<td>完整项目</td>
+<td>一个登录页</td>
+</tr>
+</tbody></table>
+<p><strong>好消息</strong>：因为 Mock 了 LLM，<strong>你不用 API key 就能跑</strong>，跑出来的结果完全可预测。</p>
+<h2 id="2-3-一句话总结项目架构">2.3 一句话总结项目架构</h2>
+<blockquote>
+<p><strong>一个 Planner Agent 通过 <code>task</code> 工具委派子 Agent，每个 Agent 独立跑 ReAct 循环，通过 MessageBus 通信。</strong></p>
+</blockquote>
+<p>别急，看完第 3 章你就懂了。</p>
+<hr>
+<h1 id="第-3-章-七大核心概念">🎓 第 3 章：七大核心概念</h1>
+<p>这是最核心的一章。学完这一章，整个项目的代码对你来说就是&quot;透明&quot;的。</p>
+<h2 id="3-1-agent-智能体">3.1 Agent（智能体）</h2>
+<h3 id="定义">定义</h3>
+<blockquote>
+<p><strong>一个拥有独立对话历史、能调用工具、能自主决策的实体。</strong></p>
+</blockquote>
+<h3 id="在项目里看-agent">在项目里看 Agent</h3>
+<p>打开 <code>config/agents.js</code>：</p>
+<pre><code class="language-javascript">// config/agents.js
+const agentDefinitions = {
+  Planner: {
+    name: &quot;Planner&quot;,
+    description: &quot;顶层编排 Agent，通过 task 工具委派子 Agent&quot;,
+    systemPrompt: null,  // 由 Skill 注入
+    tools: [&quot;task&quot;],
+  },
+
+  产品经理: {
+    name: &quot;产品经理&quot;,
+    systemPrompt: `你是一名资深产品经理，拥有10年互联网产品经验...`,
+    tools: [],
+  },
+
+  UI设计师: {
+    name: &quot;UI设计师&quot;,
+    systemPrompt: `你是一名资深UI设计师...`,
+    tools: [&quot;write_file&quot;],
+  },
+};</code></pre>
+<h3 id="关键理解">关键理解</h3>
+<p><strong>Planner 也是一个 Agent！</strong></p>
+<p>它跟产品经理、UI设计师<strong>结构上一模一样</strong>，唯一的区别是它持有 <code>task</code> 工具，能&quot;招聘&quot;别人。别的 Agent 持有 <code>write_file</code> 工具，能&quot;写文件&quot;。</p>
+<p>💡 <strong>这个洞察极其重要</strong>：在 OpenCode 体系里，所有 Agent <strong>完全平等</strong>，只是工具不同。Planner 不特殊，它就是个&quot;持有一把特殊工具的 Agent&quot;。</p>
+<hr>
+<h2 id="3-2-session-会话">3.2 Session（会话）</h2>
+<h3 id="定义-2">定义</h3>
+<blockquote>
+<p><strong>一个 Agent 私有的对话历史，并且和其他 Session 通过 <code>parentID</code> 形成一棵层级树。</strong></p>
+</blockquote>
+<h3 id="为什么需要它">为什么需要它？</h3>
+<p>想象产品经理和 UI 设计师共用一个对话记录：</p>
+<ul>
+<li>第 1 条：&quot;你是产品经理...&quot;</li>
+<li>第 2 条：&quot;现在你是 UI 设计师...&quot;</li>
+<li>LLM 看着这个记录会很困惑：&quot;我到底是谁？&quot;</li>
+</ul>
+<p><strong>Session = 每个 Agent 一个独立的小本子</strong>，各自记各自的对话。</p>
+<h3 id="在项目里看-session">在项目里看 Session</h3>
+<p>打开 <code>core/session.js</code>：</p>
+<pre><code class="language-javascript">class Session {
+  constructor({ owner, systemPrompt, parentID, canDelegate, directory }) {
+    this.id = randomUUID();                  // 这本子的编号（OpenCode ULID）
+    this.parentID = parentID;                // 上级是谁（关键！建立父子树）
+    this.owner = owner;                      // 这本子是谁的
+    this.canDelegate = canDelegate;          // 能不能再委派给别人（防递归）
+    this.directory = directory;              // 工作目录（子 Session 继承父）
+    this.turn = 0;                           // 他思考过几次
+    this.messages = [
+      { role: &quot;system&quot;, content: systemPrompt }  // 第 1 页永远是 system prompt
+    ];
+  }
+
+  addUser(content) { /* 加一页 user 的发言 */ }
+  addAssistant(content) { /* 加一页 assistant 的发言 */ }
+  addToolResult(id, content) { /* 加一页工具执行结果 */ }
+}</code></pre>
+<h3 id="关键理解-2">关键理解</h3>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Session</td>
+<td>一个人的小本子</td>
+</tr>
+<tr>
+<td>id</td>
+<td>本子的编号（HR 系统里员工工号）</td>
+</tr>
+<tr>
+<td>parentID</td>
+<td>直属上级的工号（汇报关系）</td>
+</tr>
+<tr>
+<td>messages</td>
+<td>本子上按时间顺序记的对话</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>本子的主人</td>
+</tr>
+<tr>
+<td>turn</td>
+<td>他已经&quot;翻过几次页&quot;（调用过几次 LLM）</td>
+</tr>
+<tr>
+<td>canDelegate</td>
+<td>能不能派活给下属（只有 Planner=true）</td>
+</tr>
+</tbody></table>
+<h3 id="session-父子层级-对齐-opencode-真实实现">Session 父子层级（对齐 OpenCode 真实实现）</h3>
+<p>真实 OpenCode 里，每个 Session 在创建时可以指定 <code>parentID</code>，形成一棵<strong>调用树</strong>：</p>
+<pre><code>🟢 ROOT Planner Session (canDelegate=true, parentID=null)
+    │
+    ├─ 产品经理 Session (canDelegate=false, parentID=planner_id)
+    │
+    ├─ UI设计师 Session (canDelegate=false, parentID=planner_id)
+    │
+    └─ 测试工程师 Session (canDelegate=false, parentID=planner_id)</code></pre>
+<p>关键规则（来自 OpenCode 源码 <code>Session.create</code>）：</p>
+<ol>
+<li><strong>子 Session 禁止再委派</strong>：<code>canDelegate=false</code>，调 task 工具会被拒绝  <ul>
+<li>防止&quot;产品经理 → 让 UI 设计师 → 让前端工程师 → 让设计师 → ...&quot;无限递归</li>
+</ul>
+</li>
+<li><strong>子 Session 继承父的 directory</strong>：避免 HTTP 模式下路径漂移（PR #30650）</li>
+<li><strong>父 Session 可以持有所有子 Session 的 ID</strong>：可随时回查下属历史</li>
+</ol>
+<p>我们项目里跑一次 <code>node index.js</code>，最后打印的 Session 父子树长这样：</p>
+<pre><code>🟢 ROOT [ses_5c82ffb8cadd4cca] owner=Planner (canDelegate)
+    messages=7, turn=3
+   ├─ [ses_93e418db6a2540e6] owner=产品经理
+   │   messages=3, turn=1
+   ├─ [ses_f584f61b585e4142] owner=UI设计师
+       messages=5, turn=2</code></pre>
+<hr>
+<h2 id="3-2-1-sessionstore-会话存储服务">3.2.1 SessionStore（会话存储服务）</h2>
+<h3 id="定义-3">定义</h3>
+<blockquote>
+<p><strong>Session 的&quot;数据库层&quot;——负责 Session 的持久化、查询、父子关系导航。</strong></p>
+</blockquote>
+<h3 id="为什么需要它-2">为什么需要它？</h3>
+<h3 id="为什么需要它-3">为什么需要它？</h3>
+<p>早期的 mock 项目把每个 Session 用 <code>session_&lt;taskId&gt;_&lt;owner&gt;_&lt;时间戳&gt;.json</code> 命名直接落盘，踩了几个坑：</p>
+<ul>
+<li>❌ Session ID 不固定（用时间戳），每次重启都变，没法引用</li>
+<li>❌ 文件名里塞不进 <code>parentID</code>，父子关系全丢</li>
+<li>❌ 想查&quot;Planner 有哪些子 Session&quot;得扫所有 json 文件再正则匹配</li>
+</ul>
+<p>所以我们做了一个 <strong>Session 的&quot;数据库层&quot;</strong>，专门管理这些会话：</p>
+<ul>
+<li>✅ Session ID 在创建时生成（UUID），整个生命周期不变</li>
+<li>✅ 每个 Session 一个 <code>&lt;id&gt;.json</code> 文件</li>
+<li>✅ 文件内容里显式带 <code>parentID</code> 字段</li>
+<li>✅ 提供 <code>children(parentID)</code> 这样的快速查询方法</li>
+</ul>
+<h3 id="接口对照">接口对照</h3>
+<table>
+<thead>
+<tr>
+<th>我们的 SessionStore</th>
+<th>真实 OpenCode 的 Session.Service</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>register(session)</td>
+<td>Session.create({...})</td>
+</tr>
+<tr>
+<td>persist(session)</td>
+<td>内部 SQLite INSERT</td>
+</tr>
+<tr>
+<td>get(sessionId)</td>
+<td>Session.get(id)</td>
+</tr>
+<tr>
+<td>children(parentID)</td>
+<td>Session.children(parentID)</td>
+</tr>
+<tr>
+<td>root()</td>
+<td>Session.list({ roots: true })</td>
+</tr>
+</tbody></table>
+<p>当前 Session 文件命名规范：</p>
+<table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ses_&lt;id&gt;.json</code></td>
+<td>每个 Session 一个文件，<code>&lt;id&gt;</code> 是创建时生成的 UUID（永久不变）</td>
+</tr>
+<tr>
+<td>文件里的 <code>parentID</code> 字段</td>
+<td>指向父 Session 的 <code>&lt;id&gt;</code>，建立父子树</td>
+</tr>
+<tr>
+<td>文件里的 <code>owner</code> 字段</td>
+<td>Session 归属哪个 Agent（Planner / 产品经理 / UI 设计师）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="3-2-2-上下文继承-子-agent-怎么-看到-父-agent-的思考">3.2.2 上下文继承：子 Agent 怎么&quot;看到&quot;父 Agent 的思考？</h2>
+<h3 id="核心矛盾">核心矛盾</h3>
+<p>子 Session 有自己的独立 messages（这是 Session 隔离的原则），但完全切断了父子通信会让子 Agent 失去&quot;为什么我要做这件事&quot;的语境。</p>
+<h3 id="opencode-的解决方案-compaction-上下文注入">OpenCode 的解决方案：compaction + 上下文注入</h3>
+<p>真实 OpenCode 的做法：</p>
+<ol>
+<li>父 Session 完成时，调一个内置的 <code>compaction</code> Agent 把历史压成摘要</li>
+<li>摘要塞进子 Session 的 initial prompt（作为上下文）</li>
+<li>子 Session 自己保留独立历史，不再回看父的原始消息</li>
+</ol>
+<h3 id="我们的实现">我们的实现</h3>
+<p><code>core/context-summarizer.js</code> 负责把父 Session 压成结构化摘要：</p>
+<pre><code>## 上游上下文摘要 (parentSession: &lt;id&gt;, owner: Planner)
+
+### 思考过程
+- 第 1 轮：&lt;每轮 assistant 的简短总结&gt;
+- 第 2 轮：...
+
+### 关键决策
+- 调用 `task`({&quot;agentRole&quot;:&quot;产品经理&quot;,&quot;prompt&quot;:&quot;...&quot;})
+- 调用 `task`({&quot;agentRole&quot;:&quot;UI设计师&quot;,&quot;prompt&quot;:&quot;...&quot;})
+
+### 最终产出
+- Planner 给出任务完成总结</code></pre>
+<p><code>SubAgentRunner</code> 在创建子 Session 时自动注入：</p>
+<pre><code class="language-javascript">// core/sub-agent-runner.js
+const parentContextSummary = summarize(parentSession);
+session.addUser(`${prompt}\n\n${parentContextSummary}`);</code></pre>
+<p>跑起来后，子 Agent 看到的 user prompt 长这样：</p>
+<pre><code>[1] user: 请根据以下产品经理产出的 PRD 设计登录页面 HTML：
+
+## 上游上下文摘要 (parentSession: ses_5c82..., owner: Planner)
+### 关键决策
+- 调用 `task`({&quot;agentRole&quot;:&quot;产品经理&quot;,&quot;prompt&quot;:&quot;...&quot;})</code></pre>
+<p><strong>注意：子 Session 的 messages 里只有这段摘要，没有父 Session 的完整历史。</strong> 这就是 OpenCode 的设计精髓——<strong>父子通信是单向的、压缩的、有边界的</strong>。</p>
+<hr>
+<h2 id="3-3-react-循环-推理-行动">3.3 ReAct 循环（推理 + 行动）</h2>
+<h3 id="定义-4">定义</h3>
+<blockquote>
+<p><strong>一种&quot;调 LLM → 看它想干啥 → 干 → 再调 LLM → 再看 → ...&quot;的循环模式，直到 Agent 自己说&quot;我干完了&quot;。</strong></p>
+</blockquote>
+<h3 id="为什么要循环">为什么要循环？</h3>
+<p>因为一个 Agent 干一件事可能要分多步。比如 UI 设计师：</p>
+<ol>
+<li>思考：我得先写 HTML</li>
+<li>调 <code>write_file</code> 工具：把 HTML 写进去</li>
+<li>看工具结果：写成功了吗？</li>
+<li>思考：好，写完了，给个总结</li>
+<li>完成</li>
+</ol>
+<p>如果只是&quot;调一次 LLM → 拿答案&quot;，那 Agent 就只能&quot;问答&quot;，没法&quot;做事&quot;。</p>
+<h3 id="在项目里看-react">在项目里看 ReAct</h3>
+<p>打开 <code>core/sub-agent-runner.js</code>，找到 <code>run</code> 方法里的 for 循环：</p>
+<pre><code class="language-javascript">// core/sub-agent-runner.js（简化）
+for (let turn = 1; turn &lt;= this.maxTurns; turn++) {
+  // 1. 调 LLM
+  const response = await this.llm.chat(session.getMessages(), {
+    agentRole: &quot;UI设计师&quot;,
+  });
+
+  // 2. 看 LLM 想干啥
+  const toolCalls = response.choices[0].message.tool_calls;
+
+  if (toolCalls) {
+    // 3. LLM 想调工具 → 执行工具 → 把结果塞回 Session → 下一轮
+    for (const call of toolCalls) {
+      const result = await toolRegistry.execute(call.function.name, args);
+      session.addToolResult(call.id, result);
+    }
+    continue; // 继续循环
+  } else {
+    // 4. LLM 觉得干完了 → 返回最终答案
+    return response.choices[0].message.content;
+  }
+}</code></pre>
+<h3 id="关键理解-3">关键理解</h3>
+<p><strong>ReAct 是所有现代 AI Agent 的心脏。</strong> 不管是 LangChain、AutoGPT 还是 OpenCode，核心都是这个循环。</p>
+<p>💡 <strong>ReAct vs 普通函数调用</strong>：</p>
+<ul>
+<li>普通函数：<code>调用 → 返回 → 调用 → 返回</code>，每一步你知道会发生啥</li>
+<li>ReAct：<code>调用 → AI 决定下一步干啥 → 可能调工具 → 再调 AI → ...</code>，每一步 AI 自己决定</li>
+</ul>
+<hr>
+<h2 id="3-4-tool-工具">3.4 Tool（工具）</h2>
+<h3 id="定义-5">定义</h3>
+<blockquote>
+<p><strong>Agent 能调用的&quot;能力函数&quot;。每个工具就是一个 <code>name + execute(args)</code> 的对象。</strong></p>
+</blockquote>
+<h3 id="在项目里看工具">在项目里看工具</h3>
+<p>打开 <code>core/tool-registry.js</code>：</p>
+<pre><code class="language-javascript">// 内置工具：write_file
+this.toolRegistry.register({
+  name: &quot;write_file&quot;,
+  description: &quot;把内容写入文件&quot;,
+  parameters: { type: &quot;object&quot;, properties: { ... } },
+  execute: async (args) =&gt; {
+    // 真的写文件到磁盘
+    fs.writeFileSync(args.path, args.content);
+    return &quot;文件已写入&quot;;
+  },
+});</code></pre>
+<p>调用方式：</p>
+<pre><code class="language-javascript">const result = await toolRegistry.execute(&quot;write_file&quot;, {
+  path: &quot;output/login.html&quot;,
+  content: &quot;&lt;html&gt;...&lt;/html&gt;&quot;
+});</code></pre>
+<h3 id="关键理解-4">关键理解</h3>
+<p><strong>Tool Registry = 工具的电话簿</strong>。它就是个 <code>Map&lt;name, tool&gt;</code>，加个 <code>execute(name, args)</code> 函数。</p>
+<p>💡 <strong>task 工具和 write_file 是同一个 Registry 里的&quot;公民&quot;</strong>。</p>
+<ul>
+<li>Planner 调 <code>task</code>：触发的执行器会&quot;启动子 Agent&quot;</li>
+<li>UI 设计师调 <code>write_file</code>：触发的执行器会&quot;写文件到磁盘&quot;</li>
+</ul>
+<p>Registry 不在乎——它就是个&quot;按名字调用函数&quot;的服务。</p>
+<hr>
+<h2 id="3-5-task-工具-最特殊的一个">3.5 task 工具（最特殊的一个）</h2>
+<h3 id="定义-6">定义</h3>
+<blockquote>
+<p><strong>Planner 专用的&quot;调度工具&quot;。调用它 = 启动一个子 Agent。</strong></p>
+</blockquote>
+<h3 id="为什么这么重要">为什么这么重要？</h3>
+<p>因为它是 <strong>Agent 之间沟通的唯一通道</strong>。</p>
+<p>Planner 自己<strong>不写 PRD、不写 HTML</strong>。它只会调 task 工具：</p>
+<pre><code>Planner: &quot;这个活儿派给产品经理&quot;
+         ↓
+         task 工具被调用
+         ↓
+         SubAgentRunner 创建新产品经理 Session
+         ↓
+         产品经理跑自己的 ReAct 循环
+         ↓
+         干完了把结果作为 task 工具的返回值
+         ↓
+         Planner 收到结果，继续想下一步</code></pre>
+<h3 id="在项目里看-task-工具">在项目里看 task 工具</h3>
+<p>打开 <code>core/meta-agent.js</code>，构造函数里：</p>
+<pre><code class="language-javascript">// 注册一个虚拟的 &quot;task&quot; 工具：调用 SubAgentRunner
+this.toolRegistry.register({
+  name: &quot;task&quot;,
+  description: &quot;把子任务委派给指定角色的 Agent&quot;,
+  execute: async (args) =&gt; {
+    // args: { agentRole, prompt }
+    return await this.delegateTask(args);  // 真正的委派逻辑
+  },
+});</code></pre>
+<p>注意 <code>execute</code> 是个 <code>async</code> 函数，它可以调任何异步逻辑。在这里就是&quot;启动一个全新的 Agent Session&quot;。</p>
+<hr>
+<h2 id="3-6-messagebus-消息总线">3.6 MessageBus（消息总线）</h2>
+<h3 id="定义-7">定义</h3>
+<blockquote>
+<p><strong>跨 Agent 通信的事件日志。是个 append-only 的事件流。</strong></p>
+</blockquote>
+<h3 id="为什么需要它-4">为什么需要它？</h3>
+<p>因为每个 Agent 的 Session 是隔离的。Planner 看不到产品经理 Session 里的内容。</p>
+<p>但 Planner 有时需要&quot;引用&quot;产品经理的产出（比如：&quot;PRD 已经好了，现在派给 UI 设计师，PRD 内容是...&quot;）。这时需要一个<strong>全局可访问的地方</strong>让 Planner 查到。</p>
+<h3 id="在项目里看-messagebus">在项目里看 MessageBus</h3>
+<p>打开 <code>core/message-bus.js</code>：</p>
+<pre><code class="language-javascript">publish(event) {
+  // 任何人都可以发布事件
+  this.events.push({ ...event, timestamp: Date.now() });
+}
+
+query(filters) {
+  // 按条件查询历史事件
+  return this.events.filter(e =&gt; matches(e, filters));
+}</code></pre>
+<p>调用方式：</p>
+<pre><code class="language-javascript">// 产品经理完成时
+this.messageBus.publish({
+  type: &quot;task.done&quot;,
+  source: &quot;产品经理&quot;,
+  taskId: 1,
+  payload: &quot;# 用户登录功能 PRD...&quot;
+});
+
+// Planner 需要查产品经理的产出
+const pmOutputs = this.messageBus.query({ source: &quot;产品经理&quot; });
+const prd = pmOutputs[0].payload;</code></pre>
+<h3 id="关键理解-5">关键理解</h3>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MessageBus</td>
+<td>公司公告板</td>
+</tr>
+<tr>
+<td>publish</td>
+<td>贴一张通知</td>
+</tr>
+<tr>
+<td>query</td>
+<td>翻看通知找自己要的</td>
+</tr>
+</tbody></table>
+<p><strong>它是&quot;最终一致性&quot;的</strong>：Agent 完成工作时往里写，需要数据的 Agent 自己去查。没有任何&quot;实时推送&quot;。</p>
+<hr>
+<h2 id="3-7-七个概念的关系图">3.7 七个概念的关系图</h2>
+<pre><code>                    Planner Agent
+                   ┌────────────────┐
+                   │ plannerSession  │ ◄───── 这个 Agent 的私有记忆
+                   │ id=ses_xxx      │        (id 永久不变)
+                   │ parentID=null   │        (根 Session)
+                   │ canDelegate=true│        (唯一能派活的)
+                   │ - messages[]    │
+                   └────────────────┘
+                           │
+                           │ 调 task 工具
+                           ↓
+                   ┌────────────────┐
+                   │  ToolRegistry   │ ──► write_file 工具 ──► 写文件到磁盘
+                   │  - task         │
+                   │  - write_file   │
+                   └────────────────┘
+                           │
+                           │ task 工具的执行器
+                           ↓
+                   ┌────────────────┐
+                   │ SubAgentRunner  │ ──► 创建子 Agent 的 Session
+                   │ +SessionStore   │      自动注入&quot;父上下文摘要&quot;
+                   └────────────────┘
+                           │
+                           ↓
+                    子 Agent（比如产品经理）
+                   ┌────────────────┐
+                   │  pmSession      │ ◄───── 独立的私有记忆
+                   │ id=ses_yyy      │        (新生成的 ID)
+                   │ parentID=ses_xxx│        (汇报关系：产品经理向 Planner 汇报)
+                   │ canDelegate=false│       (不能再派活)
+                   │ - messages[]    │
+                   └────────────────┘
+                           │
+                           │ 持久化
+                           ↓
+                   ┌────────────────┐
+                   │  SessionStore   │ ──► output/sessions/&lt;id&gt;.json
+                   │  - register     │      (含 parentID 字段)
+                   │  - persist      │
+                   │  - get          │
+                   │  - children     │      ← 按 parentID 查所有子 Session
+                   │  - root         │
+                   └────────────────┘
+                           │
+                           │ 完成后 publish
+                           ↓
+                   ┌────────────────┐
+                   │  MessageBus     │ ──► Planner 可以 query
+                   │  - events[]      │
+                   └────────────────┘</code></pre>
+<p><strong>关键机制</strong>：</p>
+<ul>
+<li>每个 Session 有永久 ID（创建时生成 UUID，不再用时间戳命名）</li>
+<li>父子 Session 通过 <code>parentID</code> 形成可追溯的调用树</li>
+<li>子 Agent 启动时自动拿到&quot;父上下文摘要&quot;（不靠 MessageBus 凑）</li>
+<li>SessionStore 提供类数据库的查询接口（children / root / get）</li>
+</ul>
+<hr>
+<h1 id="第-4-章-项目代码地图">🎓 第 4 章：项目代码地图</h1>
+<h2 id="4-1-文件总览">4.1 文件总览</h2>
+<pre><code>opencode-mock/
+├── index.js                  ← 入口
+├── config/                   ← 配置（Agent 和 Skill 的定义）
+│   ├── agents.js
+│   └── skills.js
+├── core/                     ← 核心机制
+│   ├── meta-agent.js         ← Planner Agent
+│   ├── sub-agent-runner.js   ← 子 Agent 运行器（含 ReAct 循环）
+│   ├── session.js            ← 对话会话
+│   ├── message-bus.js        ← 消息总线
+│   ├── tool-registry.js      ← 工具注册表
+│   ├── registry.js           ← Agent/Skill 注册中心
+│   ├── session-store.js      ← Session 持久化服务
+│   └── context-summarizer.js ← 父 Session 摘要生成器
+└── mock/                     ← Mock LLM
+    ├── llm-client.js         ← 模拟 LLM 客户端
+    └── llm-responses.js      ← 预设的 Mock 响应</code></pre>
+<h2 id="4-2-入口和配置层">4.2 入口和配置层</h2>
+<h3 id="index-js-49-行"><code>index.js</code>（49 行）</h3>
+<p><strong>作用</strong>：启动入口。创建一个 MetaAgent，喂给它用户输入。</p>
+<p><strong>关键代码</strong>：</p>
+<pre><code class="language-javascript">const metaAgent = new MetaAgent();
+await metaAgent.execute(&quot;帮我设计一个用户登录页面...&quot;);</code></pre>
+<h3 id="config-agents-js-119-行"><code>config/agents.js</code>（119 行）</h3>
+<p><strong>作用</strong>：定义所有 Agent 的&quot;人格&quot;。</p>
+<p><strong>看什么</strong>：</p>
+<ul>
+<li><code>Planner</code>：没有 systemPrompt，由 Skill 注入</li>
+<li><code>产品经理</code>：写 PRD 的人格</li>
+<li><code>UI设计师</code>：写 HTML 的人格 + 持有 <code>write_file</code> 工具</li>
+</ul>
+<h3 id="config-skills-js-107-行"><code>config/skills.js</code>（107 行）</h3>
+<p><strong>作用</strong>：定义&quot;工作流契约&quot;——Planner 怎么思考、有什么工具。</p>
+<p><strong>看什么</strong>：</p>
+<ul>
+<li><code>plannerAgent.systemPrompt</code>：Planner 的人格（注入 Agent 清单）</li>
+<li><code>taskToolDef</code>：Planner 用的 task 工具定义</li>
+</ul>
+<h2 id="4-3-核心机制层-最复杂">4.3 核心机制层（最复杂）</h2>
+<h3 id="core-meta-agent-js-249-行-必读"><code>core/meta-agent.js</code>（249 行）⭐ 必读</h3>
+<p><strong>作用</strong>：实现 Planner Agent。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>constructor()</code>：初始化所有依赖 + 注册 <code>task</code> 工具</li>
+<li><code>execute(userInput)</code>：Planner 的 ReAct 循环</li>
+<li><code>delegateTask(args)</code>：task 工具的执行器（启动子 Agent）</li>
+</ul>
+<h3 id="core-sub-agent-runner-js-179-行-必读"><code>core/sub-agent-runner.js</code>（179 行）⭐ 必读</h3>
+<p><strong>作用</strong>：实现子 Agent 的 ReAct 循环。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>run({agentRole, prompt})</code>：启动一个子 Agent，跑完返回结果</li>
+<li><code>persistSession()</code>：把 Session 保存到磁盘</li>
+</ul>
+<h3 id="core-session-js"><code>core/session.js</code></h3>
+<p><strong>作用</strong>：独立对话会话。</p>
+<p><strong>关键字段</strong>：</p>
+<ul>
+<li><code>id</code>：Session 永久 ID（UUID）</li>
+<li><code>parentID</code>：父 Session 的 ID（建立父子层级）</li>
+<li><code>canDelegate</code>：是否能再 task 委派（防递归）</li>
+<li><code>directory</code>：工作目录（子 Session 继承父）</li>
+</ul>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>addUser / addAssistant / addToolResult</code>：往消息列表追加消息</li>
+<li><code>compact()</code>：超过 20 条消息时压缩（对齐真实 OpenCode 的 <code>/compact</code>）</li>
+<li><code>snapshot()</code>：序列化为可持久化的对象</li>
+</ul>
+<h3 id="core-session-store-js-必读"><code>core/session-store.js</code>⭐ 必读</h3>
+<p><strong>作用</strong>：Session 的&quot;数据库层&quot;，对齐真实 OpenCode 的 <code>Session.Service</code>。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>register(session)</code>：注册 Session 到内存索引</li>
+<li><code>persist(session)</code>：Session 落盘到 <code>&lt;id&gt;.json</code></li>
+<li><code>get(sessionId)</code>：按 ID 取 Session（未在内存则从磁盘恢复）</li>
+<li><code>children(parentID)</code>：查一个 Session 的所有子 Session（关键查询）</li>
+<li><code>root()</code>：取根 Session（parentID=null）</li>
+</ul>
+<h3 id="core-context-summarizer-js-必读"><code>core/context-summarizer.js</code>⭐ 必读</h3>
+<p><strong>作用</strong>：把父 Session 的对话历史压缩成结构化摘要。</p>
+<p><strong>关键函数</strong>：</p>
+<ul>
+<li><code>summarize(parentSession)</code>：从 messages 提取&quot;思考过程 / 关键决策 / 最终产出&quot;，输出 Markdown</li>
+</ul>
+<p><strong>这是 OpenCode 上下文继承的核心机制</strong>：子 Agent 不直接读父 Session 的原始 messages，而是读这段压缩后的摘要——既隔离了状态，又保留了&quot;为什么做这件事&quot;的语境。</p>
+<h3 id="core-message-bus-js"><code>core/message-bus.js</code></h3>
+<p><strong>作用</strong>：事件流。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>publish(event)</code>：发事件</li>
+<li><code>query(filters)</code>：按条件查事件</li>
+</ul>
+<h3 id="core-tool-registry-js"><code>core/tool-registry.js</code></h3>
+<p><strong>作用</strong>：工具字典。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>register(tool)</code>：注册工具</li>
+<li><code>execute(name, args)</code>：执行工具</li>
+</ul>
+<h3 id="core-registry-js"><code>core/registry.js</code></h3>
+<p><strong>作用</strong>：Agent 和 Skill 的注册中心。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>getAgent(name)</code>：按名字查 Agent</li>
+<li><code>getSkill(name)</code>：按名字查 Skill</li>
+<li><code>renderPlannerSystemPrompt()</code>：把 Agent 清单注入 Planner 的 prompt</li>
+</ul>
+<h2 id="4-4-mock-层">4.4 Mock 层</h2>
+<h3 id="mock-llm-client-js"><code>mock/llm-client.js</code></h3>
+<p><strong>作用</strong>：模拟 LLM API 调用。</p>
+<p><strong>关键方法</strong>：</p>
+<ul>
+<li><code>chat(messages, options)</code>：返回预设响应</li>
+<li>路由逻辑：根据 <code>agentRole + turn</code> 决定返回哪条 Mock</li>
+</ul>
+<h3 id="mock-llm-responses-js-467-行"><code>mock/llm-responses.js</code>（467 行）</h3>
+<p><strong>作用</strong>：所有预设响应。</p>
+<p><strong>看什么</strong>：</p>
+<ul>
+<li><code>plannerResponses</code>：Planner 的 3 轮响应（委派→再委派→汇总）</li>
+<li><code>productManagerResponses</code>：产品经理的 1 轮响应（产出 PRD）</li>
+<li><code>uiDesignerResponses</code>：UI设计师的 2 轮响应（调工具→拿结果）</li>
+</ul>
+<hr>
+<h1 id="第-5-章-完整调用链路走读">🎓 第 5 章：完整调用链路走读</h1>
+<p>我们跟着一个真实运行，把每一步对应到代码。</p>
+<p><strong>场景</strong>：用户输入 <code>帮我设计一个用户登录页面，包含用户名、密码输入和登录按钮</code></p>
+<h2 id="5-1-启动阶段">5.1 启动阶段</h2>
+<pre><code>index.js:38  →  metaAgent.execute(userInput)
+                 ↓
+meta-agent.js:87  →  Planner 创建 Session（接入 SessionStore）
+                       this.plannerSession = new Session({
+                         owner:&quot;Planner&quot;,
+                         parentID: null,             // 根 Session
+                         canDelegate: true,          // Planner 唯一能派活的
+                       })
+                       this.sessionStore.register(plannerSession)
+                       this.sessionStore.persist(plannerSession)
+                       → output/sessions/ses_&lt;id&gt;.json</code></pre>
+<p><strong>发生了什么</strong>：</p>
+<ol>
+<li>MetaAgent 构造函数已经初始化好 Registry、MessageBus、ToolRegistry、SessionStore 等所有依赖</li>
+<li>MetaAgent.execute() 拿到用户输入后，<strong>给 Planner 创建了一个独立 Session</strong></li>
+<li>Planner Session 的关键字段：  <ul>
+<li><code>id</code>：新生成的 UUID（永久不变）  </li>
+<li><code>parentID</code>：null（根 Session）  </li>
+<li><code>canDelegate</code>：true（唯一能调 task 工具的 Session）</li>
+</ul>
+</li>
+<li>Session 立刻落盘到 <code>output/sessions/ses_&lt;id&gt;.json</code></li>
+<li>Planner Session 的 messages 数组现在是：</li>
+</ol>
+<pre><code class="language-javascript">[  
+  { role: &quot;system&quot;, content: &quot;你是一个资深的项目编排 Agent...&quot; },  
+  { role: &quot;user&quot;, content: &quot;帮我设计一个用户登录页面...&quot; }  
+]  </code></pre>
+<h2 id="5-2-planner-第-1-轮-llm-调用">5.2 Planner 第 1 轮 LLM 调用</h2>
+<pre><code>meta-agent.js:110  →  this.llm.chat(plannerSession.getMessages(), {agentRole: &quot;Planner&quot;})
+                       ↓
+mock/llm-client.js  →  根据 agentRole=&quot;Planner&quot; + turn=1 返回 plannerResponses[0]
+                       ↓
+返回：tool_calls: [{ name: &quot;task&quot;, arguments: '{&quot;agentRole&quot;:&quot;产品经理&quot;, ...}' }]</code></pre>
+<p><strong>Planner 的&quot;思考过程&quot;</strong>：</p>
+<ul>
+<li>输入：用户想要登录页</li>
+<li>输出：&quot;我得让产品经理先写 PRD&quot;</li>
+</ul>
+<p>Planner 没法&quot;自己写 PRD&quot;——它没那个能力。它的工具集只有 <code>task</code>，所以它必须用这个工具。</p>
+<h2 id="5-3-执行-task-工具-启动产品经理">5.3 执行 task 工具（启动产品经理）</h2>
+<pre><code>meta-agent.js:138  →  toolRegistry.execute(&quot;task&quot;, {agentRole:&quot;产品经理&quot;, prompt:&quot;...&quot;})
+                       ↓
+                    MetaAgent.delegateTask(args)
+                       ↓
+meta-agent.js:173  →  delegateTask() 创建 taskId=1，调用 subAgentRunner.run()
+                       ↓
+sub-agent-runner.js:104  →  SubAgentRunner.run()
+                            1. 查 registry 找到产品经理的 systemPrompt
+                            2. 创建新的 Session：new Session({owner:&quot;产品经理&quot;})
+                            3. pmSession.addUser(prompt)
+                            4. 进入 ReAct 循环</code></pre>
+<p><strong>关键</strong>：这里<strong>新建了一个 Session</strong>！Planner 的 Session 和产品经理的 Session 是两个独立的对象。</p>
+<h2 id="5-4-产品经理-react-循环">5.4 产品经理 ReAct 循环</h2>
+<pre><code>sub-agent-runner.js:115  →  for (let turn=1; turn&lt;=5; turn++) {
+                              response = llm.chat(pmSession.getMessages(), {agentRole:&quot;产品经理&quot;})
+                              if (response.tool_calls) { ... }   // 没有工具
+                              else { return response.content; }   // 直接产出 PRD
+                            }</code></pre>
+<p><strong>产品经理的&quot;思考过程&quot;</strong>：</p>
+<ul>
+<li>输入：原始需求</li>
+<li>输出：一段完整的 PRD（无 tool_calls）</li>
+</ul>
+<p>因为产品经理的 tools 是空数组 <code>[]</code>，它<strong>永远不会有 tool_calls</strong>，永远一轮就返回。</p>
+<h2 id="5-5-planner-收到产品经理产出">5.5 Planner 收到产品经理产出</h2>
+<pre><code>sub-agent-runner.js:165  →  messageBus.publish({type:&quot;task.done&quot;, source:&quot;产品经理&quot;, taskId:1, payload: PRD})
+                            持久化产品经理 Session 到磁盘
+                            return PRD
+                       ↓
+meta-agent.js:143  →  plannerSession.addToolResult(call.id, PRD)</code></pre>
+<p><strong>Planner Session 现在的样子</strong>：</p>
+<pre><code class="language-javascript">[
+  { role: &quot;system&quot;, content: &quot;Planner 人格...&quot; },
+  { role: &quot;user&quot;, content: &quot;原始需求&quot; },
+  { role: &quot;assistant&quot;, content: &quot;我得让产品经理先写 PRD&quot;, tool_calls: [...] },
+  { role: &quot;tool&quot;, content: &quot;# 用户登录功能 PRD...&quot; }
+]</code></pre>
+<p><strong>工具结果作为 <code>role: &quot;tool&quot;</code> 的消息塞进了 Planner 的对话历史</strong>。这就是 OpenAI 的 tool message 格式。</p>
+<h2 id="5-6-planner-第-2-轮-llm-调用">5.6 Planner 第 2 轮 LLM 调用</h2>
+<p>Planner 带着&quot;PRD 已完成&quot;的新上下文再次调 LLM：</p>
+<pre><code>meta-agent.js:110  →  llm.chat(plannerSession.getMessages(), {agentRole:&quot;Planner&quot;, sessionState:{turn:2}})
+                       ↓
+返回：tool_calls: [{ name: &quot;task&quot;, arguments: '{&quot;agentRole&quot;:&quot;UI设计师&quot;, &quot;prompt&quot;:&quot;...{{PRD_HERE}}&quot;}' }]</code></pre>
+<p><strong>Planner 的&quot;思考过程&quot;</strong>：</p>
+<ul>
+<li>输入：PRD 内容</li>
+<li>输出：&quot;PRD 写好了，该让 UI 设计师做页面了&quot;</li>
+</ul>
+<p>注意 prompt 里有个奇怪的 <code>{{PRD_HERE}}</code>——这是一个<strong>占位符</strong>，会在 delegateTask 时被替换成真实的 PRD。这是 Mock 系统的协议，真实 OpenCode 里不会有（真实 LLM 会自己写完整 prompt）。</p>
+<h2 id="5-7-启动-ui-设计师">5.7 启动 UI 设计师</h2>
+<pre><code>meta-agent.js:173  →  delegateTask()
+                       处理 {{PRD_HERE}} → 从 messageBus 查产品经理的产出 → 替换占位符
+                       taskId=2, subAgentRunner.run(agentRole=&quot;UI设计师&quot;, prompt=&quot;...真实PRD...&quot;)
+                       ↓
+sub-agent-runner.js:115  →  UI设计师 ReAct 循环开始</code></pre>
+<p><strong>这次不一样了</strong>！UI 设计师的工具集里有 <code>write_file</code>，所以它会触发工具调用。</p>
+<h2 id="5-8-ui-设计师第-1-轮-调-write-file">5.8 UI 设计师第 1 轮：调 write_file</h2>
+<pre><code>sub-agent-runner.js:121  →  llm.chat(uiSession.getMessages(), {agentRole:&quot;UI设计师&quot;})
+                       ↓
+返回：tool_calls: [{ name: &quot;write_file&quot;, arguments: '{&quot;path&quot;:&quot;output/login.html&quot;, &quot;content&quot;:&quot;&lt;!--HTML_HERE--&gt;&quot;}' }]</code></pre>
+<p><strong>UI 设计师的&quot;思考过程&quot;</strong>：</p>
+<ul>
+<li>输入：PRD + 自己的 system prompt</li>
+<li>输出：&quot;我得调 write_file 工具把 HTML 写进去&quot;</li>
+</ul>
+<p>content 里的 <code>&lt;!--HTML_HERE--&gt;</code> 是另一个占位符，在 <code>toolRegistry.execute(&quot;write_file&quot;, ...)</code> 时被替换为真实的 HTML 内容。</p>
+<h2 id="5-9-执行-write-file-工具-真写文件">5.9 执行 write_file 工具（真写文件）</h2>
+<pre><code>sub-agent-runner.js:135  →  toolRegistry.execute(&quot;write_file&quot;, args)
+                       ↓
+tool-registry.js  →  write_file.execute(args):
+                     1. 替换 &lt;!--HTML_HERE--&gt; → 真实 HTML
+                     2. fs.writeFileSync(&quot;output/login.html&quot;, htmlContent)
+                     3. return &quot;文件已写入...&quot;</code></pre>
+<p><strong>这是整个系统里</strong>唯一真正产生副作用<strong>的地方</strong>——文件被写到了磁盘上。</p>
+<h2 id="5-10-ui-设计师第-2-轮-返回摘要">5.10 UI 设计师第 2 轮：返回摘要</h2>
+<pre><code>sub-agent-runner.js:121  →  llm.chat(uiSession.getMessages(), {agentRole:&quot;UI设计师&quot;, sessionState:{turn:2}})
+                       ↓
+这次 messages 里多了一条 {role:&quot;tool&quot;, content:&quot;文件已写入...&quot;}
+                       ↓
+返回：content = &quot;✅ 已完成登录页面设计，HTML 文件已写入...&quot;</code></pre>
+<p><strong>UI 设计师的&quot;思考过程&quot;</strong>：</p>
+<ul>
+<li>输入：刚才的写文件结果</li>
+<li>输出：给 Planner 一个简短摘要</li>
+</ul>
+<p><strong>注意</strong>：这次没有 tool_calls，所以 ReAct 循环 <code>break</code>，UI 设计师结束。</p>
+<h2 id="5-11-planner-第-3-轮-输出汇总">5.11 Planner 第 3 轮：输出汇总</h2>
+<pre><code>meta-agent.js:110  →  llm.chat(plannerSession.getMessages(), {agentRole:&quot;Planner&quot;, sessionState:{turn:3}})
+                       ↓
+返回：content = &quot;任务全部完成。产品经理已产出 PRD，UI 设计师已保存 HTML...&quot;
+                       ↓
+meta-agent.js:149  →  plannerSession.addAssistant(content)
+                       finalOutput = content
+                       break</code></pre>
+<p><strong>Planner 的&quot;思考过程&quot;</strong>：</p>
+<ul>
+<li>输入：UI 设计师的摘要</li>
+<li>输出：&quot;所有任务都完成了，给用户做个汇总&quot;</li>
+</ul>
+<p>没有 tool_calls，ReAct 循环 break，整个流程结束。</p>
+<h2 id="5-12-全程调用次数统计">5.12 全程调用次数统计</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>谁调用</th>
+<th>干了什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Planner</td>
+<td>思考 + 调 task</td>
+</tr>
+<tr>
+<td>2</td>
+<td>产品经理</td>
+<td>直接产出 PRD</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Planner</td>
+<td>拿到 PRD + 调 task</td>
+</tr>
+<tr>
+<td>4</td>
+<td>UI设计师</td>
+<td>调 write_file</td>
+</tr>
+<tr>
+<td>5</td>
+<td>UI设计师</td>
+<td>拿到工具结果 + 返回摘要</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Planner</td>
+<td>拿到摘要 + 输出最终汇总</td>
+</tr>
+</tbody></table>
+<p><strong>6 次 LLM 调用 = 1 个完整的 Planner ReAct + 2 个子 Agent ReAct</strong></p>
+<hr>
+<h1 id="第-5-5-章-session-父子树与上下文继承">🎓 第 5.5 章：Session 父子树与上下文继承</h1>
+<blockquote>
+<p><strong>本章重点</strong>。如果你只想搞懂&quot;父子 Session 怎么通信&quot;，看这一章就够。</p>
+</blockquote>
+<h2 id="5-5-1-最终形成的-session-树">5.5.1 最终形成的 Session 树</h2>
+<p>跑完一次 <code>node index.js</code>，最后一次打印长这样：</p>
+<pre><code>🌳 Session 父子树
+────────────────────────────────────────────────────────────
+🟢 ROOT [ses_5c82ffb8cadd4cca] owner=Planner (canDelegate)
+    messages=7, turn=3
+   ├─ [ses_93e418db6a2540e6] owner=产品经理
+   │   messages=3, turn=1
+   ├─ [ses_f584f61b585e4142] owner=UI设计师
+       messages=5, turn=2</code></pre>
+<p>这棵树完全对齐真实 OpenCode 的 Session 层级：</p>
+<ul>
+<li>ROOT 是 Planner（<code>parentID=null</code>、<code>canDelegate=true</code>）</li>
+<li>产品经理和 UI 设计师挂在 Planner 下（<code>parentID=Planner.id</code>、<code>canDelegate=false</code>）</li>
+<li>任意子 Session 都能通过 <code>parentID</code> 字段向上回溯</li>
+</ul>
+<h2 id="5-5-2-落盘文件结构">5.5.2 落盘文件结构</h2>
+<p><code>output/sessions/</code> 目录：</p>
+<pre><code>ses_5c82ffb8cadd4cca.json    ← Planner（7 条消息，3 轮）
+ses_93e418db6a2540e6.json    ← 产品经理（3 条消息，1 轮）
+ses_f584f61b585e4142.json    ← UI设计师（5 条消息，2 轮）</code></pre>
+<p>每个文件用 Session ID 命名（永久不变），里面带：</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;ses_93e418db6a2540e6&quot;,
+  &quot;parentID&quot;: &quot;ses_5c82ffb8cadd4cca&quot;,      ← 关键
+  &quot;owner&quot;: &quot;产品经理&quot;,
+  &quot;canDelegate&quot;: false,                    ← 关键
+  &quot;directory&quot;: &quot;C:\\Users\\A\\Desktop\\opencode-mock&quot;,
+  &quot;turn&quot;: 1,
+  &quot;messages&quot;: [...]
+}</code></pre>
+<p><strong>对比两种命名风格</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>命名风格</th>
+<th>示例</th>
+<th>parentID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>时间戳命名（不推荐）</td>
+<td><code>session_1_产品经理_1782544012636.json</code></td>
+<td>❌ 文件名里没有</td>
+</tr>
+<tr>
+<td>UUID 命名（当前用）</td>
+<td><code>ses_93e418db6a2540e6.json</code></td>
+<td>✅ 写在文件内容里</td>
+</tr>
+</tbody></table>
+<p>UUID 命名的好处：</p>
+<ul>
+<li>✅ ID 在创建时一次性生成，整个生命周期不变，可重复引用</li>
+<li>✅ 文件名固定跨重启，方便调试和日志回溯</li>
+<li>✅ <code>parentID</code> 等结构化字段全部写在 JSON 里，便于程序读取</li>
+</ul>
+<h2 id="5-5-3-上下文继承流程-最关键的链路">5.5.3 上下文继承流程（最关键的链路）</h2>
+<p>Planner 委派 UI 设计师时，UI 设计师的 Session 第一条 user 消息长这样：</p>
+<pre><code>请根据以下产品经理产出的 PRD 设计登录页面 HTML：
+
+## 上游上下文摘要 (parentSession: ses_5c82ffb8cadd4cca, owner: Planner)
+
+### 思考过程
+- 第 1 轮：用户需要一个登录页面。按照 req-to-page 工作流，我先委派给产品经理输出 PRD。
+
+### 关键决策
+- 调用 `task`({&quot;agentRole&quot;:&quot;产品经理&quot;,&quot;prompt&quot;:&quot;请根据用户的原始需求输出完整的产品规格说明书（PRD）...&quot;})
+- 调用 `task`({&quot;agentRole&quot;:&quot;UI设计师&quot;,&quot;prompt&quot;:&quot;请根据以下产品经理产出的 PRD 设计登录页面 HTML...&quot;})
+
+### 最终产出
+- （尚在进行中）</code></pre>
+<p>这段摘要由 <code>core/context-summarizer.js</code> 的 <code>summarize(plannerSession)</code> 生成。</p>
+<h2 id="5-5-4-完整代码调用链">5.5.4 完整代码调用链</h2>
+<pre><code>MetaAgent.execute()
+  │
+  ├─ 创建 Planner Session (parentID=null, canDelegate=true)
+  │    └─ sessionStore.persist()
+  │
+  ├─ Planner LLM 第 1 轮 → tool_call(task)
+  │
+  ├─ MetaAgent.delegateTask(args)
+  │    ├─ summarize(this.plannerSession)    ← 把 Planner 历史压成摘要
+  │    │
+  │    └─ SubAgentRunner.run({
+  │         agentRole: &quot;产品经理&quot;,
+  │         parentSession: this.plannerSession,  ← 父 Session 引用
+  │         parentContextSummary: &lt;摘要&gt;,        ← 自动注入
+  │       })
+  │         ├─ new Session({ parentID: planner.id, canDelegate: false })  ← 关键
+  │         │    └─ sessionStore.persist()
+  │         ├─ session.addUser(`${prompt}\n\n${parentContextSummary}`)
+  │         ├─ 子 Agent 的 ReAct 循环
+  │         └─ sessionStore.persist()  ← 每轮都落盘
+  │
+  └─ ...（更多委派同理）</code></pre>
+<h2 id="5-5-5-防递归-子-session-为什么不能调-task">5.5.5 防递归：子 Session 为什么不能调 task</h2>
+<p><code>SubAgentRunner</code> 在执行 <code>task</code> 工具时加了守卫：</p>
+<pre><code class="language-javascript">// core/sub-agent-runner.js
+for (const call of toolCalls) {
+  if (call.function.name === &quot;task&quot;) {
+    session.addToolResult(
+      call.id,
+      `❌ 子 Agent 不能调用 task 工具（OpenCode 默认 deny，防止无限递归）`,
+    );
+    continue;
+  }
+}</code></pre>
+<p>这是对齐 OpenCode 的默认权限规则：</p>
+<pre><code class="language-typescript">// 真实 OpenCode 的 SubAgentSession 创建逻辑
+permission: [
+  { permission: &quot;task&quot;, pattern: &quot;*&quot;, action: &quot;deny&quot; },  // ← 默认禁止嵌套
+  ...
+]</code></pre>
+<p><strong>为什么必须禁止？</strong> 假如允许：</p>
+<pre><code>Planner → 产品经理 → UI 设计师 → 子 UI 设计师 → 子子 UI 设计师 → ...</code></pre>
+<p>会出现：</p>
+<ol>
+<li>无限递归（栈溢出 / token 爆炸）</li>
+<li>权限混乱（深层子 Agent 到底受谁的限制？）</li>
+<li>调试噩梦（不知道哪个 Agent 在干哪个活）</li>
+</ol>
+<hr>
+<h1 id="第-6-章-动手实验任务">🎓 第 6 章：动手实验任务</h1>
+<p>光看不动手永远学不会。来做几个练习。</p>
+<h2 id="实验-1-跑起来看输出-5-分钟">实验 1：跑起来看输出（5 分钟）</h2>
+<pre><code class="language-bash">cd opencode-mock
+npm run start</code></pre>
+<p>观察：</p>
+<ol>
+<li>总共几次&quot;📞 第 N 次大模型调用&quot;？</li>
+<li>每次的请求消息是什么？</li>
+<li>哪些次调用有 <code>tool_calls</code>？</li>
+</ol>
+<h2 id="实验-2-修改-planner-的-system-prompt-10-分钟">实验 2：修改 Planner 的 system prompt（10 分钟）</h2>
+<p>打开 <code>config/skills.js</code>，找到 <code>plannerAgent.systemPrompt</code>，在末尾加一句：</p>
+<pre><code class="language-javascript">&quot;另外，记住：每完成一个子任务后，要先简单总结一下该任务的产出。&quot;</code></pre>
+<p>再跑一遍，看 Planner 行为有没有变化。</p>
+<p>💡 这就是 Prompt Engineering——改 system prompt 就能改 Agent 行为。</p>
+<h2 id="实验-3-加一个新角色-30-分钟-推荐">实验 3：加一个新角色（30 分钟）⭐ 推荐</h2>
+<p>目标：加一个&quot;测试工程师&quot; Agent，负责&quot;测试登录页&quot;。</p>
+<h3 id="步骤-1-在-config-agents-js-加-agent-定义">步骤 1：在 <code>config/agents.js</code> 加 Agent 定义</h3>
+<pre><code class="language-javascript">测试工程师: {
+  name: &quot;测试工程师&quot;,
+  description: &quot;负责测试登录页功能，输出测试用例&quot;,
+  systemPrompt: `你是一名资深测试工程师。
+
+## 核心职责
+1. 根据产品 PRD 设计测试用例
+2. 输出 Markdown 格式的测试用例文档
+
+## 输出规范
+- 使用 Markdown 格式
+- 包含：测试场景、输入数据、预期结果、实际结果
+- 不输出与技术实现相关的内容`,
+  tools: [],
+  toolDefs: [],
+  temperature: 0.4,
+  maxTokens: 1500,
+},</code></pre>
+<h3 id="步骤-2-修改-mock-响应">步骤 2：修改 Mock 响应</h3>
+<p>打开 <code>mock/llm-responses.js</code>，参考 <code>productManagerResponses</code> 加一组：</p>
+<pre><code class="language-javascript">const testEngineerResponses = [
+  {
+    id: &quot;chatcmpl-test-1&quot;,
+    choices: [{
+      index: 0,
+      message: {
+        role: &quot;assistant&quot;,
+        content: `# 登录功能测试用例\n\n## 测试场景1：正常登录\n- 输入：admin / 123456\n- 预期：登录成功\n- 实际：...`,
+        tool_calls: null,
+      },
+    }],
+  },
+];
+
+module.exports = {
+  ...,
+  testEngineerResponses,
+};</code></pre>
+<h3 id="步骤-3-在-mock-llm-client-js-加上路由">步骤 3：在 <code>mock/llm-client.js</code> 加上路由</h3>
+<pre><code class="language-javascript">getResponsesForRole(agentRole) {
+  switch (agentRole) {
+    ...
+    case &quot;测试工程师&quot;:
+      return testEngineerResponses;
+    ...
+  }
+}</code></pre>
+<h3 id="步骤-4-让-planner-委派给测试工程师">步骤 4：让 Planner 委派给测试工程师</h3>
+<p>打开 <code>mock/llm-responses.js</code>，修改 <code>plannerResponses[2]</code>（第 3 轮响应），让 Planner 在 UI 设计师完成后也委派测试工程师。</p>
+<p>跑一遍，应该能看到 Planner 委派 3 个 Agent 了！</p>
+<h2 id="实验-4-debug-一次失败-15-分钟">实验 4：debug 一次失败（15 分钟）</h2>
+<p>故意改坏一处，看错误信息怎么读：</p>
+<ol>
+<li>把 <code>config/agents.js</code> 里某个 Agent 的 <code>tools: [&quot;write_file&quot;]</code> 改成 <code>tools: [&quot;non_exist_tool&quot;]</code></li>
+<li>跑 <code>npm run start</code></li>
+<li>看错误栈能不能定位到问题</li>
+</ol>
+<p>💡 这就是调试 Agent 系统最重要的技能——从错误栈反推是哪一层出了问题。</p>
+<hr>
+<h1 id="第-7-章-常见误区与进阶方向">🎓 第 7 章：常见误区与进阶方向</h1>
+<h2 id="7-1-新手最容易踩的-5-个坑">7.1 新手最容易踩的 5 个坑</h2>
+<h3 id="坑-1-把所有事都塞给一个-agent">❌ 坑 1：把所有事都塞给一个 Agent</h3>
+<p><strong>症状</strong>：把所有 systemPrompt 都写得很长，把所有工具都注册给一个 Agent。</p>
+<p><strong>为什么错</strong>：长 prompt 让 LLM 困惑，多工具让 Agent 不知道该用哪个。</p>
+<p><strong>正确做法</strong>：<strong>单一职责</strong>。一个 Agent 只干一件事，需要协作就加新 Agent。</p>
+<h3 id="坑-2-让-agent-互相共享-session">❌ 坑 2：让 Agent 互相共享 Session</h3>
+<p><strong>症状</strong>：让产品经理和 UI 设计师共享一个 messages 数组。</p>
+<p><strong>为什么错</strong>：角色混淆，LLM 不知道&quot;我现在是谁&quot;。</p>
+<p><strong>正确做法</strong>：<strong>每个 Agent 一个独立 Session</strong>，通过 MessageBus 通信。</p>
+<h3 id="坑-3-工具返回值塞进-systemprompt">❌ 坑 3：工具返回值塞进 systemPrompt</h3>
+<p><strong>症状</strong>：把工具结果硬编码到 system prompt 里。</p>
+<p><strong>为什么错</strong>：工具结果是动态的，不应该出现在静态配置里。</p>
+<p><strong>正确做法</strong>：用 <code>role: &quot;tool&quot;</code> 的消息动态塞进 messages 数组。</p>
+<h3 id="坑-4-忘记设置-maxturns">❌ 坑 4：忘记设置 <code>maxTurns</code></h3>
+<p><strong>症状</strong>：ReAct 循环死循环，调了几百次 LLM。</p>
+<p><strong>为什么错</strong>：LLM 可能一直调工具不出最终答案。</p>
+<p><strong>正确做法</strong>：设置合理的 <code>maxTurns</code>（5-10 次），超过就强制结束。</p>
+<h3 id="坑-5-把-mock-写得太脆弱">❌ 坑 5：把 Mock 写得太脆弱</h3>
+<p><strong>症状</strong>：用关键词匹配路由（如检测 messages 里有没有&quot;产品经理&quot;）。</p>
+<p><strong>为什么错</strong>：改个 prompt 关键词路由就失效。</p>
+<p><strong>正确做法</strong>：<strong>显式路由</strong>。我们这个项目用 <code>agentRole + turn</code> 路由就是这个思路。</p>
+<h2 id="7-2-真实生产-vs-这个-mock-的差距">7.2 真实生产 vs 这个 mock 的差距</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>opencode-mock</th>
+<th>真实生产</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LLM</td>
+<td>Mock 预设答案</td>
+<td>GPT-4o / Claude / Gemini</td>
+</tr>
+<tr>
+<td>工具</td>
+<td>几个 Mock 工具</td>
+<td>几十个真实工具（bash、编辑器、浏览器、Git...）</td>
+</tr>
+<tr>
+<td>Session 存储</td>
+<td>内存索引 + 单文件 JSON</td>
+<td>SQLite / PostgreSQL（支持跨进程、事务、回滚）</td>
+</tr>
+<tr>
+<td>Session 父子层级</td>
+<td>parentID 单层</td>
+<td>parentID 多层树 + session_parent 导航 + forking</td>
+</tr>
+<tr>
+<td>上下文继承</td>
+<td>summarize() 拼到 prompt</td>
+<td>compaction Agent + 实时压缩 + 摘要回放</td>
+</tr>
+<tr>
+<td>权限系统</td>
+<td>canDelegate 单字段</td>
+<td>完整的 permission DSL（pattern + action + scope）</td>
+</tr>
+<tr>
+<td>错误处理</td>
+<td>直接抛异常</td>
+<td>重试、回滚、降级</td>
+</tr>
+<tr>
+<td>监控</td>
+<td>控制台打印</td>
+<td>OpenTelemetry / 日志系统</td>
+</tr>
+<tr>
+<td>安全</td>
+<td>无</td>
+<td>沙箱、权限控制、路径白名单</td>
+</tr>
+</tbody></table>
+<h2 id="7-3-你可以接着探索的方向">7.3 你可以接着探索的方向</h2>
+<ol>
+<li><strong>加真实 LLM 支持</strong>：把 MockLLMClient 换成 OpenAI 客户端，看真实 LLM 怎么决策</li>
+<li><strong>并行执行</strong>：现在 Planner 是串行的，可以改成&quot;无依赖的子任务并行&quot;</li>
+<li><strong>Plan 模式</strong>：让 Planner 先输出一份完整计划再执行（对齐 OpenCode 的 /plan 命令）</li>
+<li><strong>工具权限</strong>：每个 Agent 配置 allowedTools 白名单</li>
+<li><strong>多层级委派</strong>：现在 Planner→子 Agent 是单层，可以尝试打开&quot;子 Agent 再委派&quot;的开关（OpenCode 的 task_budget）</li>
+<li><strong>Session 回放</strong>：从磁盘加载一个旧 Session 的 messages，复现它的 ReAct 过程</li>
+<li><strong>观测性</strong>：加 token 计数、调用时长、成功率等 metrics</li>
+</ol>
+<hr>
+<h1 id="第-8-章-openai-chat-completions-接口完全解析">🎓 第 8 章：OpenAI Chat Completions 接口完全解析</h1>
+<p>本章讲解 <strong>OpenAI 官方 Chat Completions API</strong>——这是目前事实标准的大模型接口规范。所有大模型（OpenAI 官方、Azure OpenAI、vLLM 部署的任意模型、Ollama、DeepSeek、智谱、月之暗面、甚至 opencode-mock 这种伪 LLM）都号称 &quot;OpenAI 兼容&quot;，原因只有一个：<strong>完全照搬下面这个接口形状</strong>。</p>
+<p>学完本章你能回答：</p>
+<ul>
+<li>真实 OpenAI API 到底长什么样？只有一个接口还是好几个？</li>
+<li><code>tools</code> 字段塞在 request body 里还是独立接口？</li>
+<li><code>tool_calls</code> 是什么格式？<code>finish_reason</code> 为什么会有 <code>&quot;tool_calls&quot;</code> 这种奇怪值？</li>
+<li>一次 ReAct 循环里，请求/响应来回几次？每次数据长什么样？</li>
+<li>opencode-mock 那 60 行 <code>mockLLM()</code> 为什么能&quot;模拟&quot; OpenAI？</li>
+</ul>
+<hr>
+<h2 id="8-1-一个接口走天下">8.1 一个接口走天下</h2>
+<p>OpenAI 提供的大模型对话 <strong>只有一个 HTTP 接口</strong>：</p>
+<pre><code>POST https://api.openai.com/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer sk-xxxxxxxxxxxxxx</code></pre>
+<p><strong>没有 <code>/v1/chat</code>、<code>/v1/tools</code>、<code>/v1/function-call</code>。</strong> 一切功能（普通对话、流式输出、函数调用/工具调用、多轮对话、Vision 识图、JSON 强制输出、Structured Outputs）都通过 <strong>这一个接口 + 不同请求字段</strong> 完成。</p>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>怎么用同一个接口解决</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>普通问答</td>
+<td>请求只带 <code>messages</code> 字段</td>
+</tr>
+<tr>
+<td>多轮对话</td>
+<td>请求的 <code>messages</code> 数组里塞多轮历史</td>
+</tr>
+<tr>
+<td>函数调用</td>
+<td>请求多加一个 <code>tools</code> 字段</td>
+</tr>
+<tr>
+<td>强制 JSON 输出</td>
+<td>请求加 <code>response_format: { type: &quot;json_object&quot; }</code></td>
+</tr>
+<tr>
+<td>流式输出（SSE）</td>
+<td>请求加 <code>&quot;stream&quot;: true</code>，响应变成 <code>data: {...}</code> 多个 chunk</td>
+</tr>
+<tr>
+<td>Vision（看图）</td>
+<td><code>messages</code> 里的 content 改成数组，含 <code>type: &quot;image_url&quot;</code></td>
+</tr>
+<tr>
+<td>Structured Outputs</td>
+<td>请求加 <code>response_format: { type: &quot;json_schema&quot;, json_schema: {...} }</code></td>
+</tr>
+</tbody></table>
+<p><strong>这就是为什么 opencode-mock 可以假装&quot;兼容 OpenAI&quot;——只要接口形状对，调用方根本不在乎背后是 GPT-4 还是 5 行假代码。</strong></p>
+<hr>
+<h2 id="8-2-请求体-request-body">8.2 请求体（Request Body）</h2>
+<p>完整字段长这样（实际生产里你只需要关心前 5 个）：</p>
+<pre><code class="language-json">{
+  &quot;model&quot;: &quot;gpt-4o&quot;,
+  &quot;messages&quot;: [
+    {&quot;role&quot;: &quot;system&quot;,    &quot;content&quot;: &quot;你是一个登录页设计专家&quot;},
+    {&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;帮我设计一个登录页&quot;},
+    {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;我先规划一下任务...&quot;},
+    {&quot;role&quot;: &quot;user&quot;,      &quot;content&quot;: &quot;继续&quot;}
+  ],
+  &quot;tools&quot;: [...],           // 可选：可用工具列表（8.5 详解）
+  &quot;tool_choice&quot;: &quot;auto&quot;,    // 可选：auto / none / {&quot;type&quot;: &quot;function&quot;,&quot;function&quot;:{&quot;name&quot;:&quot;x&quot;}}
+  &quot;temperature&quot;: 0.7,       // 可选：0-2，越大越发散
+  &quot;top_p&quot;: 1.0,             // 可选：核采样
+  &quot;max_tokens&quot;: 4096,       // 可选：单次最多生成多少 token
+  &quot;stream&quot;: false,          // 可选：true 走 SSE 流式
+  &quot;response_format&quot;: {...}, // 可选：强制 JSON / JSON Schema
+  &quot;stop&quot;: [&quot;\n\n&quot;],         // 可选：碰到这些字符串就停
+  &quot;n&quot;: 1,                   // 可选：一次生成几个候选，默认 1
+  &quot;user&quot;: &quot;user-id-123&quot;,    // 可选：帮你追踪滥用，留空也行
+  &quot;presence_penalty&quot;: 0,    // 可选：-2 到 2
+  &quot;frequency_penalty&quot;: 0,   // 可选：-2 到 2
+  &quot;seed&quot;: 42                // 可选：尽量复现相同输出
+}</code></pre>
+<h3 id="8-2-1-messages-字段-对话历史是一条数组">8.2.1 <code>messages</code> 字段——对话历史是一条数组</h3>
+<p>整个对话历史就是一个<strong>有序数组</strong>，每个元素是一条消息。这种设计的好处：<strong>服务端无状态</strong>——你可以随时切到别的服务器继续聊。</p>
+<table>
+<thead>
+<tr>
+<th><code>role</code> 取值</th>
+<th>谁发的</th>
+<th><code>content</code> 是什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>system</code></td>
+<td>你（开发者）</td>
+<td>设定 AI 人格、规则</td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td>最终用户</td>
+<td>用户输入</td>
+</tr>
+<tr>
+<td><code>assistant</code></td>
+<td>AI 自己</td>
+<td>AI 的回复</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td>工具执行结果（AI 视角）</td>
+<td>工具返回值</td>
+</tr>
+<tr>
+<td><code>developer</code></td>
+<td>等价 system</td>
+<td>OpenAI o-series 模型专用</td>
+</tr>
+</tbody></table>
+<h3 id="8-2-2-assistant-消息有两种形态">8.2.2 <code>assistant</code> 消息有两种形态</h3>
+<p>普通文字回复：</p>
+<pre><code class="language-json">{
+  &quot;role&quot;: &quot;assistant&quot;,
+  &quot;content&quot;: &quot;好的，我先规划一下：1. 写PRD 2. 设计UI 3. 写代码&quot;
+}</code></pre>
+<p><strong>调用工具时</strong>（特殊形态——<code>content</code> 通常是 <code>null</code>，多了一个 <code>tool_calls</code> 字段）：</p>
+<pre><code class="language-json">{
+  &quot;role&quot;: &quot;assistant&quot;,
+  &quot;content&quot;: null,
+  &quot;tool_calls&quot;: [
+    {
+      &quot;id&quot;: &quot;call_abc123&quot;,
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;function&quot;: {
+        &quot;name&quot;: &quot;task&quot;,
+        &quot;arguments&quot;: &quot;{\&quot;role\&quot;:\&quot;product_manager\&quot;,\&quot;task\&quot;:\&quot;写PRD\&quot;}&quot;
+      }
+    }
+  ]
+}</code></pre>
+<blockquote>
+<p><strong>关键点</strong>：<code>tool_calls</code> 不是新接口，也不是新消息类型。它就是 assistant 消息上的一个数组字段。每次调用 LLM 都要把这个数组原封不动塞回去，让 LLM &quot;记住&quot; 自己刚才发了哪些工具调用。</p>
+</blockquote>
+<h3 id="8-2-3-tool-消息-把工具结果喂回给-llm">8.2.3 <code>tool</code> 消息：把工具结果喂回给 LLM</h3>
+<p>工具执行完，得到返回值后，要构造一条 <code>role: &quot;tool&quot;</code> 的消息塞回去。<strong>必须带上 <code>tool_call_id</code></strong> 关联到刚才那条 assistant 消息的 <code>id</code>：</p>
+<pre><code class="language-json">{
+  &quot;role&quot;: &quot;tool&quot;,
+  &quot;tool_call_id&quot;: &quot;call_abc123&quot;,
+  &quot;name&quot;: &quot;product_manager&quot;,
+  &quot;content&quot;: &quot;{\&quot;prd\&quot;:\&quot;已完成，登录页需求文档....\&quot;}&quot;
+}</code></pre>
+<p><strong>强约束</strong>：每一个 <code>tool</code> 消息 <strong>必须</strong> 紧跟在一个含 <code>tool_calls</code> 的 <code>assistant</code> 消息之后。OpenAI 校验会直接报错。</p>
+<hr>
+<h2 id="8-3-响应体-response-body">8.3 响应体（Response Body）</h2>
+<p>普通请求的响应长这样：</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;chatcmpl-abc123&quot;,
+  &quot;object&quot;: &quot;chat.completion&quot;,
+  &quot;created&quot;: 1719740000,
+  &quot;model&quot;: &quot;gpt-4o-2024-08-06&quot;,
+  &quot;choices&quot;: [
+    {
+      &quot;index&quot;: 0,
+      &quot;message&quot;: {
+        &quot;role&quot;: &quot;assistant&quot;,
+        &quot;content&quot;: &quot;好的，我先规划...&quot;,
+        &quot;tool_calls&quot;: null
+      },
+      &quot;finish_reason&quot;: &quot;stop&quot;
+    }
+  ],
+  &quot;usage&quot;: {
+    &quot;prompt_tokens&quot;: 120,
+    &quot;completion_tokens&quot;: 85,
+    &quot;total_tokens&quot;: 205
+  },
+  &quot;system_fingerprint&quot;: &quot;fp_xxx&quot;
+}</code></pre>
+<h3 id="8-3-1-关键字段速查">8.3.1 关键字段速查</h3>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+<th>你要不要读它</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>choices[0].message</code></td>
+<td>AI 这次的实际回复（内容或工具调用）</td>
+<td>✅ <strong>必须</strong></td>
+</tr>
+<tr>
+<td><code>choices[0].finish_reason</code></td>
+<td>为啥停了（见下表）</td>
+<td>✅ <strong>必须</strong></td>
+</tr>
+<tr>
+<td><code>usage.prompt_tokens</code></td>
+<td>你这次喂了多少 token</td>
+<td>💰 计费用</td>
+</tr>
+<tr>
+<td><code>usage.completion_tokens</code></td>
+<td>AI 生成多少 token</td>
+<td>💰 计费用</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td>本次响应唯一 ID（日志用）</td>
+<td>可选</td>
+</tr>
+<tr>
+<td><code>system_fingerprint</code></td>
+<td>模型版本指纹（监控后端切换）</td>
+<td>可选</td>
+</tr>
+<tr>
+<td><code>choices[1..n]</code></td>
+<td>候选（仅 <code>n&gt;1</code> 时有）</td>
+<td>一般不用</td>
+</tr>
+</tbody></table>
+<h3 id="8-3-2-finish-reason-枚举值">8.3.2 <code>finish_reason</code> 枚举值</h3>
+<p>这个字段决定了你下一步该怎么走：</p>
+<table>
+<thead>
+<tr>
+<th><code>finish_reason</code></th>
+<th>含义</th>
+<th>你的下一步动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&quot;stop&quot;</code></td>
+<td>自然停止（说完了或碰到 stop token）</td>
+<td>把 <code>content</code> 显示给用户，结束</td>
+</tr>
+<tr>
+<td><code>&quot;length&quot;</code></td>
+<td>达到 <code>max_tokens</code> 被截断</td>
+<td>内容不完整，重试或告知用户</td>
+</tr>
+<tr>
+<td><code>&quot;tool_calls&quot;</code></td>
+<td>LLM 想调用工具，<code>message.tool_calls</code> 非空</td>
+<td>执行工具，把结果当 <code>role:tool</code> 塞回去，<strong>再调一次 API</strong></td>
+</tr>
+<tr>
+<td><code>&quot;content_filter&quot;</code></td>
+<td>内容被安全策略拦了</td>
+<td>提示用户</td>
+</tr>
+<tr>
+<td><code>&quot;function_call&quot;</code></td>
+<td>旧版 function calling API，已废弃</td>
+<td>当 <code>tool_calls</code> 处理</td>
+</tr>
+</tbody></table>
+<p><strong>ReAct 循环的核心就是这个判断</strong>：</p>
+<pre><code>if finish_reason == &quot;tool_calls&quot;:
+    for tool_call in message.tool_calls:
+        执行对应的工具
+        把结果作为 role:tool 消息塞回 messages
+    再发起一次 /v1/chat/completions 请求（携带累积后的 messages）
+else:  // stop 或 length
+    return message.content 给用户</code></pre>
+<hr>
+<h2 id="8-4-一次完整-react-循环的请求-响应时序">8.4 一次完整 ReAct 循环的请求/响应时序</h2>
+<p>下面展示 Planner 调一次产品经理子 Agent 时，<strong>OpenAI 视角</strong>下到底发生了什么：</p>
+<pre><code>┌─────────────────────────┐                ┌─────────────────────────┐
+│   你的程序（比如 Planner） │                │      OpenAI / vLLM      │
+└─────────────────────────┘                └─────────────────────────┘
+            │                                        │
+            │─── 第 1 次请求 ────────────────────────▶│
+            │    messages=[                          │
+            │      {role:system, content:&quot;你是...&quot;},│
+            │      {role:user,   content:&quot;设计登录页&quot;}│
+            │    ]                                   │
+            │    tools=[...]                         │
+            │                                        │
+            │◀──── 响应 1 ──────────────────────────│
+            │    finish_reason: &quot;tool_calls&quot;         │
+            │    tool_calls: [{                     │
+            │      id:&quot;call_1&quot;,                      │
+            │      function.name: &quot;task&quot;,            │
+            │      function.arguments: '{&quot;role&quot;:&quot;product_manager&quot;}'│
+            │    }]                                  │
+            │                                        │
+            │  本地执行 task 工具                     │
+            │  启动产品经理子 Agent → 它也会调 LLM    │
+            │  （这里嵌套一次完整的 ReAct）            │
+            │  收集子 Agent 的最终回复                │
+            │                                        │
+            │─── 第 2 次请求 ────────────────────────▶│
+            │    messages=[                          │
+            │      ...上面 2 条不变,                  │
+            │      {role:&quot;assistant&quot;, tool_calls:[{id:&quot;call_1&quot;,...}]},│
+            │      {role:&quot;tool&quot;, tool_call_id:&quot;call_1&quot;,│
+            │       content:&quot;PRD 已写好：...&quot;}        │
+            │    ]                                   │
+            │                                        │
+            │◀──── 响应 2 ──────────────────────────│
+            │    finish_reason: &quot;tool_calls&quot;         │
+            │    tool_calls: [{id:&quot;call_2&quot;, function.name:&quot;task&quot;, ...}]│
+            │                                        │
+            │  本地执行 task(UI设计师)                │
+            │                                        │
+            │─── 第 3 次请求 ────────────────────────▶│
+            │    messages=[...]                      │
+            │    （现在累积了所有 tool_calls 和 tool） │
+            │                                        │
+            │◀──── 响应 3 ──────────────────────────│
+            │    finish_reason: &quot;stop&quot;               │
+            │    content: &quot;登录页已设计完成，文件在...&quot;│
+            │                                        │
+            │  结束，输出给用户                       │</code></pre>
+<p><strong>要点</strong>：</p>
+<ul>
+<li>LLM 端<strong>完全无状态</strong>——它看到的永远是 <code>messages</code> 这个完整数组</li>
+<li><code>tool_call_id</code> 是会话内的&quot;事物流水号&quot;，保证 LLM 不会把工具返回值搞混</li>
+<li>一次 ReAct 循环可能涉及 <strong>N 次 API 调用</strong>（N = 工具调用次数 + 1）</li>
+<li>如果中途某一轮你给的消息里 <code>tool_calls</code> 和 <code>tool</code> 对不上号，OpenAI 会直接返回 400</li>
+</ul>
+<hr>
+<h2 id="8-5-tools-字段定义-告诉-llm-有什么可用工具">8.5 <code>tools</code> 字段定义——告诉 LLM 有什么可用工具</h2>
+<p><code>tools</code> 不是独立接口，它是 <code>request body</code> 里的一个数组字段，告诉 LLM：&quot;我有这些工具，你可以选一个调用&quot;。</p>
+<h3 id="8-5-1-完整字段">8.5.1 完整字段</h3>
+<pre><code class="language-json">{
+  &quot;tools&quot;: [
+    {
+      &quot;type&quot;: &quot;function&quot;,
+      &quot;function&quot;: {
+        &quot;name&quot;: &quot;task&quot;,
+        &quot;description&quot;: &quot;委派任务给指定角色 Agent，返回该 Agent 的输出&quot;,
+        &quot;parameters&quot;: {
+          &quot;type&quot;: &quot;object&quot;,
+          &quot;properties&quot;: {
+            &quot;role&quot;: {
+              &quot;type&quot;: &quot;string&quot;,
+              &quot;enum&quot;: [&quot;product_manager&quot;, &quot;ui_designer&quot;],
+              &quot;description&quot;: &quot;要委派的角色&quot;
+            },
+            &quot;task&quot;: {
+              &quot;type&quot;: &quot;string&quot;,
+              &quot;description&quot;: &quot;任务描述&quot;
+            }
+          },
+          &quot;required&quot;: [&quot;role&quot;, &quot;task&quot;]
+        },
+        &quot;strict&quot;: true
+      }
+    }
+  ],
+  &quot;tool_choice&quot;: &quot;auto&quot;
+}</code></pre>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools[].type</code></td>
+<td>工具类型，目前官方只支持 <code>&quot;function&quot;</code></td>
+</tr>
+<tr>
+<td><code>tools[].function.name</code></td>
+<td>函数名（<strong>必填</strong>，就是 LLM 会在 <code>tool_calls[].function.name</code> 里吐出来的名字）</td>
+</tr>
+<tr>
+<td><code>tools[].function.description</code></td>
+<td>描述（必填，LLM 据此决定调不调）</td>
+</tr>
+<tr>
+<td><code>tools[].function.parameters</code></td>
+<td>JSON Schema 格式的参数定义（可选但强烈建议填）</td>
+</tr>
+<tr>
+<td><code>tools[].function.strict</code></td>
+<td>是否启用严格模式（true 之后参数必须严格匹配 schema）</td>
+</tr>
+<tr>
+<td><code>tool_choice</code></td>
+<td><code>&quot;auto&quot;</code> 让模型自己决定、<code>&quot;none&quot;</code> 禁止调工具、<code>&quot;required&quot;</code> 强制调、<code>{&quot;type&quot;:&quot;function&quot;,&quot;function&quot;:{&quot;name&quot;:&quot;X&quot;}}</code> 强制调指定的</td>
+</tr>
+</tbody></table>
+<h3 id="8-5-2-llm-怎么-决定-调不调工具">8.5.2 LLM 怎么&quot;决定&quot;调不调工具</h3>
+<p>本质上是 LLM 在生成文本时，按概率决定下一个 token 是文本内容还是工具调用。<br><strong>没有内置 if-else</strong>——LLM 输出的就是一段文本，只是 OpenAI 后处理把满足工具格式的部分解析成结构化的 <code>tool_calls</code>。</p>
+<p>所以你的 <code>description</code> 写得越好、参数 <code>description</code> 越清楚，LLM 选对工具的概率越大。</p>
+<hr>
+<h2 id="8-6-opencode-mock-的-mock-策略">8.6 opencode-mock 的 Mock 策略</h2>
+<p>现在你懂了 OpenAI 真实 API 长什么样，回头看 opencode-mock 那 60 行 Mock LLM，就会觉得&quot;也就那么回事&quot;。</p>
+<h3 id="8-6-1-它模拟的对象">8.6.1 它模拟的对象</h3>
+<p>opencode-mock 的 <code>mockLLMClient</code> 模拟的就是 <code>/v1/chat/completions</code> 这个接口。<strong>只模拟这一个</strong>——没有 <code>/v1/embeddings</code>、没有 <code>/v1/images</code>，因为 Agent 模式只需要它。</p>
+<h3 id="8-6-2-它实现的东西-vs-真实接口">8.6.2 它实现的东西 vs 真实接口</h3>
+<table>
+<thead>
+<tr>
+<th>真实 OpenAI 字段</th>
+<th>opencode-mock 是怎么模拟的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /v1/chat/completions</code></td>
+<td>一个 <code>chat({messages, tools})</code> 函数（内部用 <code>mockLLM()</code> 走 mock 响应表）</td>
+</tr>
+<tr>
+<td><code>messages</code> 数组</td>
+<td>完整保留，<strong>不</strong>做任何处理</td>
+</tr>
+<tr>
+<td><code>tools[].function.name</code></td>
+<td>当 <code>system</code> 消息里的&quot;可用工具列表&quot;提取出来用于路由</td>
+</tr>
+<tr>
+<td><code>tool_calls</code> 输出</td>
+<td>不是从 LLM 推出来，而是从预定义的 467 行 <code>llm-responses.js</code> 表里查</td>
+</tr>
+<tr>
+<td><code>finish_reason</code></td>
+<td>写死 ——有工具时返回 <code>&quot;tool_calls&quot;</code>，否则 <code>&quot;stop&quot;</code></td>
+</tr>
+<tr>
+<td><code>usage</code></td>
+<td>不模拟（返回空对象），生产里你得自己计费</td>
+</tr>
+</tbody></table>
+<h3 id="8-6-3-为什么这么简化也能跑通-agent">8.6.3 为什么这么简化也能跑通 Agent</h3>
+<p>ReAct 循环在 Agent 代码里是这样的伪代码：</p>
+<pre><code>while True:
+    response = llm.chat(messages, tools)
+    message = response.choices[0].message
+    
+    if response.choices[0].finish_reason == &quot;tool_calls&quot;:
+        for tool_call in message.tool_calls:
+            args = JSON.parse(tool_call.function.arguments)
+            result = tool_registry[tool_call.function.name](args)
+            messages.push({
+                role: &quot;tool&quot;,
+                tool_call_id: tool_call.id,
+                name: tool_call.function.name,
+                content: result
+            })
+    else:
+        return message.content  // finish_reason == &quot;stop&quot;</code></pre>
+<p><strong>这一套循环是 Agent 代码写的，跟 LLM 是真是假完全无关。</strong></p>
+<p>只要 <code>chat()</code> 函数长得像 OpenAI 那样返回：</p>
+<pre><code class="language-js">{
+  id, model,
+  choices: [{ message: { role, content, tool_calls }, finish_reason }],
+  usage: {}
+}</code></pre>
+<p>那不管是 <code>gpt-4o</code>、本地 <code>Qwen2.5</code>、还是 <code>mockLLM()</code>，Agent 都能用。<strong>这就是 OpenAI 接口成为事实标准的根本原因——它是 Agent ↔ LLM 之间的通用语。</strong></p>
+<h3 id="8-6-4-想换成真实-llm-改-3-行就行">8.6.4 想换成真实 LLM？改 3 行就行</h3>
+<p>打开 <code>mock/llm-client.js</code>，看里面的 <code>chat()</code> 方法签名是不是和上面那段伪代码长得一样？如果是，你只要把里面 <code>mockLLM()</code> 这一行改成：</p>
+<pre><code class="language-js">return await openai.chat.completions.create({
+  model: 'gpt-4o-mini',
+  messages: this.formatMessages(messages),  // 把项目内部格式转成 OpenAI 格式
+  tools: this.formatTools(tools)            // 同上
+});</code></pre>
+<p>你的所有 Agent、子 Agent、ReAct 循环都不用改——这就是解耦的魅力。</p>
+<hr>
+<h2 id="8-7-一张图总结">8.7 一张图总结</h2>
+<pre><code>┌────────────────────────────────────────────────────────────┐
+│  OpenAI Chat Completions API 真实结构                        │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  请求（POST /v1/chat/completions）                           │
+│    ├─ model        : &quot;gpt-4o&quot;                              │
+│    ├─ messages[]   : [{role, content/tool_calls}, ...]      │
+│    ├─ tools[]      : [{type:&quot;function&quot;, function:{...}}]    │  ← tools 不是接口，是字段
+│    ├─ tool_choice  : auto / none / required / 指定函数       │
+│    ├─ temperature  : 0~2                                    │
+│    └─ ...其他 25 个字段                                    │
+│                                                            │
+│  响应                                                       │
+│    ├─ choices[0].message      : {role, content, tool_calls} │
+│    ├─ choices[0].finish_reason : &quot;stop&quot; | &quot;tool_calls&quot; | ... │
+│    └─ usage                   : {prompt_tokens, ...}       │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
+
+                ↓ ReAct 循环的边界完全在客户端（你的代码）↓
+
+┌────────────────────────────────────────────────────────────┐
+│  Agent 循环伪代码                                            │
+├────────────────────────────────────────────────────────────┤
+│  while True:                                               │
+│    resp = llm.chat(messages, tools)                         │
+│    if resp.choices[0].finish_reason == &quot;tool_calls&quot;:        │
+│      for tc in resp.choices[0].message.tool_calls:          │
+│        result = exec(tc.function.name, tc.function.args)    │
+│        messages.push({role:&quot;tool&quot;, tool_call_id:tc.id, ...})│
+│    else:                                                    │
+│      return resp.choices[0].message.content                 │
+└────────────────────────────────────────────────────────────┘</code></pre>
+<p><strong>记住三句话</strong>：</p>
+<ol>
+<li><strong>只有一个接口</strong>：<code>/v1/chat/completions</code>，<code>tools</code> 是字段不是接口。</li>
+<li><strong><code>finish_reason</code> 是 ReAct 循环的开关</strong>：<code>&quot;tool_calls&quot;</code> 就续调工具，<code>&quot;stop&quot;</code> 就结束。</li>
+<li><strong><code>tool_call_id</code> 是串联工具调用的&quot;事物流水号&quot;</strong>——assistant 的 <code>tool_calls</code> 和后面的 <code>tool</code> 消息靠它配对。</li>
+</ol>
+
+</div>
+
+<!-- ─── Right-side TOC ─── -->
+<aside class="toc-aside">
+  <div class="toc-title">本页目录</div>
+  <a class="lvl-2 is-chapter" href="#第-1-章-ai-agent-入门" data-chapter-marker="第-1-章-ai-agent-入门">🎓 第 1 章：AI Agent 入门</a>
+<a class="lvl-2" href="#1-1-什么是-ai-agent" data-chapter="第-1-章-ai-agent-入门" data-toc-link="1-1-什么是-ai-agent">1.1 什么是 AI Agent？</a>
+<a class="lvl-2" href="#1-2-为什么要多-agent" data-chapter="第-1-章-ai-agent-入门" data-toc-link="1-2-为什么要多-agent">1.2 为什么要多 Agent？</a>
+<a class="lvl-2" href="#1-3-opencode-是什么" data-chapter="第-1-章-ai-agent-入门" data-toc-link="1-3-opencode-是什么">1.3 OpenCode 是什么？</a>
+<a class="lvl-2 is-chapter" href="#第-2-章-认识-opencode-mock" data-chapter-marker="第-2-章-认识-opencode-mock">🎓 第 2 章：认识 opencode-mock</a>
+<a class="lvl-2" href="#2-1-项目目标" data-chapter="第-2-章-认识-opencode-mock" data-toc-link="2-1-项目目标">2.1 项目目标</a>
+<a class="lvl-2" href="#2-2-真实-vs-mock" data-chapter="第-2-章-认识-opencode-mock" data-toc-link="2-2-真实-vs-mock">2.2 真实 vs Mock</a>
+<a class="lvl-2" href="#2-3-一句话总结项目架构" data-chapter="第-2-章-认识-opencode-mock" data-toc-link="2-3-一句话总结项目架构">2.3 一句话总结项目架构</a>
+<a class="lvl-2 is-chapter" href="#第-3-章-七大核心概念" data-chapter-marker="第-3-章-七大核心概念">🎓 第 3 章：七大核心概念</a>
+<a class="lvl-2" href="#3-1-agent-智能体" data-chapter="第-3-章-七大核心概念" data-toc-link="3-1-agent-智能体">3.1 Agent（智能体）</a>
+<a class="lvl-3" href="#定义" data-chapter="第-3-章-七大核心概念" data-toc-link="定义">定义</a>
+<a class="lvl-3" href="#在项目里看-agent" data-chapter="第-3-章-七大核心概念" data-toc-link="在项目里看-agent">在项目里看 Agent</a>
+<a class="lvl-3" href="#关键理解" data-chapter="第-3-章-七大核心概念" data-toc-link="关键理解">关键理解</a>
+<a class="lvl-2" href="#3-2-session-会话" data-chapter="第-3-章-七大核心概念" data-toc-link="3-2-session-会话">3.2 Session（会话）</a>
+<a class="lvl-3" href="#定义-2" data-chapter="第-3-章-七大核心概念" data-toc-link="定义-2">定义</a>
+<a class="lvl-3" href="#为什么需要它" data-chapter="第-3-章-七大核心概念" data-toc-link="为什么需要它">为什么需要它？</a>
+<a class="lvl-3" href="#在项目里看-session" data-chapter="第-3-章-七大核心概念" data-toc-link="在项目里看-session">在项目里看 Session</a>
+<a class="lvl-3" href="#关键理解-2" data-chapter="第-3-章-七大核心概念" data-toc-link="关键理解-2">关键理解</a>
+<a class="lvl-3" href="#session-父子层级-对齐-opencode-真实实现" data-chapter="第-3-章-七大核心概念" data-toc-link="session-父子层级-对齐-opencode-真实实现">Session 父子层级（对齐 OpenCode 真实实现）</a>
+<a class="lvl-2" href="#3-2-1-sessionstore-会话存储服务" data-chapter="第-3-章-七大核心概念" data-toc-link="3-2-1-sessionstore-会话存储服务">3.2.1 SessionStore（会话存储服务）</a>
+<a class="lvl-3" href="#定义-3" data-chapter="第-3-章-七大核心概念" data-toc-link="定义-3">定义</a>
+<a class="lvl-3" href="#为什么需要它-2" data-chapter="第-3-章-七大核心概念" data-toc-link="为什么需要它-2">为什么需要它？</a>
+<a class="lvl-3" href="#为什么需要它-3" data-chapter="第-3-章-七大核心概念" data-toc-link="为什么需要它-3">为什么需要它？</a>
+<a class="lvl-3" href="#接口对照" data-chapter="第-3-章-七大核心概念" data-toc-link="接口对照">接口对照</a>
+<a class="lvl-2" href="#3-2-2-上下文继承-子-agent-怎么-看到-父-agent-的思考" data-chapter="第-3-章-七大核心概念" data-toc-link="3-2-2-上下文继承-子-agent-怎么-看到-父-agent-的思考">3.2.2 上下文继承：子 Agent 怎么&quot;看到&quot;父 Agent 的思考？</a>
+<a class="lvl-3" href="#核心矛盾" data-chapter="第-3-章-七大核心概念" data-toc-link="核心矛盾">核心矛盾</a>
+<a class="lvl-3" href="#opencode-的解决方案-compaction-上下文注入" data-chapter="第-3-章-七大核心概念" data-toc-link="opencode-的解决方案-compaction-上下文注入">OpenCode 的解决方案：compaction + 上下文注入</a>
+<a class="lvl-3" href="#我们的实现" data-chapter="第-3-章-七大核心概念" data-toc-link="我们的实现">我们的实现</a>
+<a class="lvl-2" href="#3-3-react-循环-推理-行动" data-chapter="第-3-章-七大核心概念" data-toc-link="3-3-react-循环-推理-行动">3.3 ReAct 循环（推理 + 行动）</a>
+<a class="lvl-3" href="#定义-4" data-chapter="第-3-章-七大核心概念" data-toc-link="定义-4">定义</a>
+<a class="lvl-3" href="#为什么要循环" data-chapter="第-3-章-七大核心概念" data-toc-link="为什么要循环">为什么要循环？</a>
+<a class="lvl-3" href="#在项目里看-react" data-chapter="第-3-章-七大核心概念" data-toc-link="在项目里看-react">在项目里看 ReAct</a>
+<a class="lvl-3" href="#关键理解-3" data-chapter="第-3-章-七大核心概念" data-toc-link="关键理解-3">关键理解</a>
+<a class="lvl-2" href="#3-4-tool-工具" data-chapter="第-3-章-七大核心概念" data-toc-link="3-4-tool-工具">3.4 Tool（工具）</a>
+<a class="lvl-3" href="#定义-5" data-chapter="第-3-章-七大核心概念" data-toc-link="定义-5">定义</a>
+<a class="lvl-3" href="#在项目里看工具" data-chapter="第-3-章-七大核心概念" data-toc-link="在项目里看工具">在项目里看工具</a>
+<a class="lvl-3" href="#关键理解-4" data-chapter="第-3-章-七大核心概念" data-toc-link="关键理解-4">关键理解</a>
+<a class="lvl-2" href="#3-5-task-工具-最特殊的一个" data-chapter="第-3-章-七大核心概念" data-toc-link="3-5-task-工具-最特殊的一个">3.5 task 工具（最特殊的一个）</a>
+<a class="lvl-3" href="#定义-6" data-chapter="第-3-章-七大核心概念" data-toc-link="定义-6">定义</a>
+<a class="lvl-3" href="#为什么这么重要" data-chapter="第-3-章-七大核心概念" data-toc-link="为什么这么重要">为什么这么重要？</a>
+<a class="lvl-3" href="#在项目里看-task-工具" data-chapter="第-3-章-七大核心概念" data-toc-link="在项目里看-task-工具">在项目里看 task 工具</a>
+<a class="lvl-2" href="#3-6-messagebus-消息总线" data-chapter="第-3-章-七大核心概念" data-toc-link="3-6-messagebus-消息总线">3.6 MessageBus（消息总线）</a>
+<a class="lvl-3" href="#定义-7" data-chapter="第-3-章-七大核心概念" data-toc-link="定义-7">定义</a>
+<a class="lvl-3" href="#为什么需要它-4" data-chapter="第-3-章-七大核心概念" data-toc-link="为什么需要它-4">为什么需要它？</a>
+<a class="lvl-3" href="#在项目里看-messagebus" data-chapter="第-3-章-七大核心概念" data-toc-link="在项目里看-messagebus">在项目里看 MessageBus</a>
+<a class="lvl-3" href="#关键理解-5" data-chapter="第-3-章-七大核心概念" data-toc-link="关键理解-5">关键理解</a>
+<a class="lvl-2" href="#3-7-七个概念的关系图" data-chapter="第-3-章-七大核心概念" data-toc-link="3-7-七个概念的关系图">3.7 七个概念的关系图</a>
+<a class="lvl-2 is-chapter" href="#第-4-章-项目代码地图" data-chapter-marker="第-4-章-项目代码地图">🎓 第 4 章：项目代码地图</a>
+<a class="lvl-2" href="#4-1-文件总览" data-chapter="第-4-章-项目代码地图" data-toc-link="4-1-文件总览">4.1 文件总览</a>
+<a class="lvl-2" href="#4-2-入口和配置层" data-chapter="第-4-章-项目代码地图" data-toc-link="4-2-入口和配置层">4.2 入口和配置层</a>
+<a class="lvl-3" href="#index-js-49-行" data-chapter="第-4-章-项目代码地图" data-toc-link="index-js-49-行">`index.js`（49 行）</a>
+<a class="lvl-3" href="#config-agents-js-119-行" data-chapter="第-4-章-项目代码地图" data-toc-link="config-agents-js-119-行">`config/agents.js`（119 行）</a>
+<a class="lvl-3" href="#config-skills-js-107-行" data-chapter="第-4-章-项目代码地图" data-toc-link="config-skills-js-107-行">`config/skills.js`（107 行）</a>
+<a class="lvl-2" href="#4-3-核心机制层-最复杂" data-chapter="第-4-章-项目代码地图" data-toc-link="4-3-核心机制层-最复杂">4.3 核心机制层（最复杂）</a>
+<a class="lvl-3" href="#core-meta-agent-js-249-行-必读" data-chapter="第-4-章-项目代码地图" data-toc-link="core-meta-agent-js-249-行-必读">`core/meta-agent.js`（249 行）⭐ 必读</a>
+<a class="lvl-3" href="#core-sub-agent-runner-js-179-行-必读" data-chapter="第-4-章-项目代码地图" data-toc-link="core-sub-agent-runner-js-179-行-必读">`core/sub-agent-runner.js`（179 行）⭐ 必读</a>
+<a class="lvl-3" href="#core-session-js" data-chapter="第-4-章-项目代码地图" data-toc-link="core-session-js">`core/session.js`</a>
+<a class="lvl-3" href="#core-session-store-js-必读" data-chapter="第-4-章-项目代码地图" data-toc-link="core-session-store-js-必读">`core/session-store.js`⭐ 必读</a>
+<a class="lvl-3" href="#core-context-summarizer-js-必读" data-chapter="第-4-章-项目代码地图" data-toc-link="core-context-summarizer-js-必读">`core/context-summarizer.js`⭐ 必读</a>
+<a class="lvl-3" href="#core-message-bus-js" data-chapter="第-4-章-项目代码地图" data-toc-link="core-message-bus-js">`core/message-bus.js`</a>
+<a class="lvl-3" href="#core-tool-registry-js" data-chapter="第-4-章-项目代码地图" data-toc-link="core-tool-registry-js">`core/tool-registry.js`</a>
+<a class="lvl-3" href="#core-registry-js" data-chapter="第-4-章-项目代码地图" data-toc-link="core-registry-js">`core/registry.js`</a>
+<a class="lvl-2" href="#4-4-mock-层" data-chapter="第-4-章-项目代码地图" data-toc-link="4-4-mock-层">4.4 Mock 层</a>
+<a class="lvl-3" href="#mock-llm-client-js" data-chapter="第-4-章-项目代码地图" data-toc-link="mock-llm-client-js">`mock/llm-client.js`</a>
+<a class="lvl-3" href="#mock-llm-responses-js-467-行" data-chapter="第-4-章-项目代码地图" data-toc-link="mock-llm-responses-js-467-行">`mock/llm-responses.js`（467 行）</a>
+<a class="lvl-2 is-chapter" href="#第-5-章-完整调用链路走读" data-chapter-marker="第-5-章-完整调用链路走读">🎓 第 5 章：完整调用链路走读</a>
+<a class="lvl-2" href="#5-1-启动阶段" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-1-启动阶段">5.1 启动阶段</a>
+<a class="lvl-2" href="#5-2-planner-第-1-轮-llm-调用" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-2-planner-第-1-轮-llm-调用">5.2 Planner 第 1 轮 LLM 调用</a>
+<a class="lvl-2" href="#5-3-执行-task-工具-启动产品经理" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-3-执行-task-工具-启动产品经理">5.3 执行 task 工具（启动产品经理）</a>
+<a class="lvl-2" href="#5-4-产品经理-react-循环" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-4-产品经理-react-循环">5.4 产品经理 ReAct 循环</a>
+<a class="lvl-2" href="#5-5-planner-收到产品经理产出" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-5-planner-收到产品经理产出">5.5 Planner 收到产品经理产出</a>
+<a class="lvl-2" href="#5-6-planner-第-2-轮-llm-调用" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-6-planner-第-2-轮-llm-调用">5.6 Planner 第 2 轮 LLM 调用</a>
+<a class="lvl-2" href="#5-7-启动-ui-设计师" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-7-启动-ui-设计师">5.7 启动 UI 设计师</a>
+<a class="lvl-2" href="#5-8-ui-设计师第-1-轮-调-write-file" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-8-ui-设计师第-1-轮-调-write-file">5.8 UI 设计师第 1 轮：调 write\_file</a>
+<a class="lvl-2" href="#5-9-执行-write-file-工具-真写文件" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-9-执行-write-file-工具-真写文件">5.9 执行 write\_file 工具（真写文件）</a>
+<a class="lvl-2" href="#5-10-ui-设计师第-2-轮-返回摘要" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-10-ui-设计师第-2-轮-返回摘要">5.10 UI 设计师第 2 轮：返回摘要</a>
+<a class="lvl-2" href="#5-11-planner-第-3-轮-输出汇总" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-11-planner-第-3-轮-输出汇总">5.11 Planner 第 3 轮：输出汇总</a>
+<a class="lvl-2" href="#5-12-全程调用次数统计" data-chapter="第-5-章-完整调用链路走读" data-toc-link="5-12-全程调用次数统计">5.12 全程调用次数统计</a>
+<a class="lvl-2 is-chapter" href="#第-5-5-章-session-父子树与上下文继承" data-chapter-marker="第-5-5-章-session-父子树与上下文继承">🎓 第 5.5 章：Session 父子树与上下文继承</a>
+<a class="lvl-2" href="#5-5-1-最终形成的-session-树" data-chapter="第-5-5-章-session-父子树与上下文继承" data-toc-link="5-5-1-最终形成的-session-树">5.5.1 最终形成的 Session 树</a>
+<a class="lvl-2" href="#5-5-2-落盘文件结构" data-chapter="第-5-5-章-session-父子树与上下文继承" data-toc-link="5-5-2-落盘文件结构">5.5.2 落盘文件结构</a>
+<a class="lvl-2" href="#5-5-3-上下文继承流程-最关键的链路" data-chapter="第-5-5-章-session-父子树与上下文继承" data-toc-link="5-5-3-上下文继承流程-最关键的链路">5.5.3 上下文继承流程（最关键的链路）</a>
+<a class="lvl-2" href="#5-5-4-完整代码调用链" data-chapter="第-5-5-章-session-父子树与上下文继承" data-toc-link="5-5-4-完整代码调用链">5.5.4 完整代码调用链</a>
+<a class="lvl-2" href="#5-5-5-防递归-子-session-为什么不能调-task" data-chapter="第-5-5-章-session-父子树与上下文继承" data-toc-link="5-5-5-防递归-子-session-为什么不能调-task">5.5.5 防递归：子 Session 为什么不能调 task</a>
+<a class="lvl-2 is-chapter" href="#第-6-章-动手实验任务" data-chapter-marker="第-6-章-动手实验任务">🎓 第 6 章：动手实验任务</a>
+<a class="lvl-2" href="#实验-1-跑起来看输出-5-分钟" data-chapter="第-6-章-动手实验任务" data-toc-link="实验-1-跑起来看输出-5-分钟">实验 1：跑起来看输出（5 分钟）</a>
+<a class="lvl-2" href="#实验-2-修改-planner-的-system-prompt-10-分钟" data-chapter="第-6-章-动手实验任务" data-toc-link="实验-2-修改-planner-的-system-prompt-10-分钟">实验 2：修改 Planner 的 system prompt（10 分钟）</a>
+<a class="lvl-2" href="#实验-3-加一个新角色-30-分钟-推荐" data-chapter="第-6-章-动手实验任务" data-toc-link="实验-3-加一个新角色-30-分钟-推荐">实验 3：加一个新角色（30 分钟）⭐ 推荐</a>
+<a class="lvl-3" href="#步骤-1-在-config-agents-js-加-agent-定义" data-chapter="第-6-章-动手实验任务" data-toc-link="步骤-1-在-config-agents-js-加-agent-定义">步骤 1：在 `config/agents.js` 加 Agent 定义</a>
+<a class="lvl-3" href="#步骤-2-修改-mock-响应" data-chapter="第-6-章-动手实验任务" data-toc-link="步骤-2-修改-mock-响应">步骤 2：修改 Mock 响应</a>
+<a class="lvl-3" href="#步骤-3-在-mock-llm-client-js-加上路由" data-chapter="第-6-章-动手实验任务" data-toc-link="步骤-3-在-mock-llm-client-js-加上路由">步骤 3：在 `mock/llm-client.js` 加上路由</a>
+<a class="lvl-3" href="#步骤-4-让-planner-委派给测试工程师" data-chapter="第-6-章-动手实验任务" data-toc-link="步骤-4-让-planner-委派给测试工程师">步骤 4：让 Planner 委派给测试工程师</a>
+<a class="lvl-2" href="#实验-4-debug-一次失败-15-分钟" data-chapter="第-6-章-动手实验任务" data-toc-link="实验-4-debug-一次失败-15-分钟">实验 4：debug 一次失败（15 分钟）</a>
+<a class="lvl-2 is-chapter" href="#第-7-章-常见误区与进阶方向" data-chapter-marker="第-7-章-常见误区与进阶方向">🎓 第 7 章：常见误区与进阶方向</a>
+<a class="lvl-2" href="#7-1-新手最容易踩的-5-个坑" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="7-1-新手最容易踩的-5-个坑">7.1 新手最容易踩的 5 个坑</a>
+<a class="lvl-3" href="#坑-1-把所有事都塞给一个-agent" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="坑-1-把所有事都塞给一个-agent">❌ 坑 1：把所有事都塞给一个 Agent</a>
+<a class="lvl-3" href="#坑-2-让-agent-互相共享-session" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="坑-2-让-agent-互相共享-session">❌ 坑 2：让 Agent 互相共享 Session</a>
+<a class="lvl-3" href="#坑-3-工具返回值塞进-systemprompt" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="坑-3-工具返回值塞进-systemprompt">❌ 坑 3：工具返回值塞进 systemPrompt</a>
+<a class="lvl-3" href="#坑-4-忘记设置-maxturns" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="坑-4-忘记设置-maxturns">❌ 坑 4：忘记设置 `maxTurns`</a>
+<a class="lvl-3" href="#坑-5-把-mock-写得太脆弱" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="坑-5-把-mock-写得太脆弱">❌ 坑 5：把 Mock 写得太脆弱</a>
+<a class="lvl-2" href="#7-2-真实生产-vs-这个-mock-的差距" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="7-2-真实生产-vs-这个-mock-的差距">7.2 真实生产 vs 这个 mock 的差距</a>
+<a class="lvl-2" href="#7-3-你可以接着探索的方向" data-chapter="第-7-章-常见误区与进阶方向" data-toc-link="7-3-你可以接着探索的方向">7.3 你可以接着探索的方向</a>
+<a class="lvl-2 is-chapter" href="#第-8-章-openai-chat-completions-接口完全解析" data-chapter-marker="第-8-章-openai-chat-completions-接口完全解析">🎓 第 8 章：OpenAI Chat Completions 接口完全解析</a>
+<a class="lvl-2" href="#8-1-一个接口走天下" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-1-一个接口走天下">8.1 一个接口走天下</a>
+<a class="lvl-2" href="#8-2-请求体-request-body" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-2-请求体-request-body">8.2 请求体（Request Body）</a>
+<a class="lvl-3" href="#8-2-1-messages-字段-对话历史是一条数组" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-2-1-messages-字段-对话历史是一条数组">8.2.1 `messages` 字段——对话历史是一条数组</a>
+<a class="lvl-3" href="#8-2-2-assistant-消息有两种形态" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-2-2-assistant-消息有两种形态">8.2.2 `assistant` 消息有两种形态</a>
+<a class="lvl-3" href="#8-2-3-tool-消息-把工具结果喂回给-llm" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-2-3-tool-消息-把工具结果喂回给-llm">8.2.3 `tool` 消息：把工具结果喂回给 LLM</a>
+<a class="lvl-2" href="#8-3-响应体-response-body" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-3-响应体-response-body">8.3 响应体（Response Body）</a>
+<a class="lvl-3" href="#8-3-1-关键字段速查" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-3-1-关键字段速查">8.3.1 关键字段速查</a>
+<a class="lvl-3" href="#8-3-2-finish-reason-枚举值" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-3-2-finish-reason-枚举值">8.3.2 `finish_reason` 枚举值</a>
+<a class="lvl-2" href="#8-4-一次完整-react-循环的请求-响应时序" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-4-一次完整-react-循环的请求-响应时序">8.4 一次完整 ReAct 循环的请求/响应时序</a>
+<a class="lvl-2" href="#8-5-tools-字段定义-告诉-llm-有什么可用工具" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-5-tools-字段定义-告诉-llm-有什么可用工具">8.5 `tools` 字段定义——告诉 LLM 有什么可用工具</a>
+<a class="lvl-3" href="#8-5-1-完整字段" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-5-1-完整字段">8.5.1 完整字段</a>
+<a class="lvl-3" href="#8-5-2-llm-怎么-决定-调不调工具" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-5-2-llm-怎么-决定-调不调工具">8.5.2 LLM 怎么&quot;决定&quot;调不调工具</a>
+<a class="lvl-2" href="#8-6-opencode-mock-的-mock-策略" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-6-opencode-mock-的-mock-策略">8.6 opencode-mock 的 Mock 策略</a>
+<a class="lvl-3" href="#8-6-1-它模拟的对象" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-6-1-它模拟的对象">8.6.1 它模拟的对象</a>
+<a class="lvl-3" href="#8-6-2-它实现的东西-vs-真实接口" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-6-2-它实现的东西-vs-真实接口">8.6.2 它实现的东西 vs 真实接口</a>
+<a class="lvl-3" href="#8-6-3-为什么这么简化也能跑通-agent" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-6-3-为什么这么简化也能跑通-agent">8.6.3 为什么这么简化也能跑通 Agent</a>
+<a class="lvl-3" href="#8-6-4-想换成真实-llm-改-3-行就行" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-6-4-想换成真实-llm-改-3-行就行">8.6.4 想换成真实 LLM？改 3 行就行</a>
+<a class="lvl-2" href="#8-7-一张图总结" data-chapter="第-8-章-openai-chat-completions-接口完全解析" data-toc-link="8-7-一张图总结">8.7 一张图总结</a>
+
+</aside>
+
+<script>
+  // Progress bar
+  const progressFill = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    progressFill.style.width = pct + '%';
+  });
+
+  // Highlight active nav item
+  // 侧栏 + 右侧 TOC 的 active 高亮都交给 updateTocVisibility 的 scroll-spy 算法
+  // 旧的 IntersectionObserver 移除（rootMargin 太严苛，h2 边界容易漏触发）
+
+  // ─── 右侧 TOC：scroll-spy 决定当前 chapter + 当前 active 小节 ───
+  const tocLinks = document.querySelectorAll('.toc-aside a[data-toc-link], .toc-aside a.is-chapter');
+  const tocChapterMarkers = document.querySelectorAll('.toc-aside a[data-chapter-marker]');
+  if (tocLinks.length > 0) {
+    // 收集所有 chapter 标题元素（HTML 里真正的 h1）
+    const chapterHeads = Array.from(tocChapterMarkers)
+      .map(a => document.getElementById(a.getAttribute('data-chapter-marker')))
+      .filter(Boolean);
+
+    let activeChapterId = null;
+
+    // 同步 sidebar 高亮（跟右侧 TOC 一致：scroll-spy 直接算当前 active heading）
+  const sidebarNavLinks = document.querySelectorAll('.sidebar .nav-item');
+
+  function updateTocVisibility() {
+    // 根据 chapterHeads 的位置判断当前 chapter
+    const scrollY = window.scrollY + 100; // 100px 偏移，提前切换
+    let newChapter = null;
+    for (const ch of chapterHeads) {
+      if (ch.offsetTop <= scrollY) newChapter = ch;
+      else break;
+    }
+    const newChapterId = newChapter ? newChapter.id : null;
+    if (newChapterId !== activeChapterId) {
+      activeChapterId = newChapterId;
+      // 切换可见性：只显示当前 chapter 的项（含其 chapter 标题自身）
+      tocLinks.forEach(link => {
+        const linkChapter = link.dataset.chapter || link.dataset.chapterMarker;
+        const visible = !linkChapter || linkChapter === newChapterId;
+        link.style.display = visible ? '' : 'none';
+        if (visible && newChapterId === linkChapter && link.classList.contains('is-chapter')) {
+          // 当前 chapter 标题始终显在最上面，不加 active
+          link.classList.remove('active');
+        }
+      });
+
+      // 把当前 chapter 标题 scroll-into-view（限 toc-aside 容器内）
+      const visibleChapterMark = document.querySelector(
+        '.toc-aside a[data-chapter-marker="' + newChapterId + '"]'
+      );
+      if (visibleChapterMark) {
+        const aside = visibleChapterMark.closest('.toc-aside');
+        if (aside) {
+          // 用 getBoundingClientRect 算相对 aside 视口的位置
+          const linkRect = visibleChapterMark.getBoundingClientRect();
+          const asideRect = aside.getBoundingClientRect();
+          const relTop = linkRect.top - asideRect.top;
+          // 仅当 chapter 标题在视口外才滚
+          if (relTop < 0 || relTop > aside.clientHeight) {
+            const desiredScrollTop =
+              linkRect.top - asideRect.top + aside.scrollTop - 60;
+            aside.scrollTop = Math.max(0, desiredScrollTop);
+          }
+        }
+      }
+
+      // ─── 同步左侧 sidebar：chapter 高亮 + 容器内滚动 ───
+      // 用 [href="#chapterId"] 找 sidebar 里对应的 chapter 标题
+      const sidebarChapter = newChapterId
+        ? document.querySelector('.sidebar .nav-item.chapter[href="#' + newChapterId + '"]')
+        : null;
+      if (sidebarChapter) {
+        // 高亮当前 chapter（与右侧 TOC 的 active 风格区分）
+        document.querySelectorAll('.sidebar .nav-item.chapter').forEach(c => {
+          c.classList.toggle('current-chapter', c === sidebarChapter);
+        });
+        // 容器内滚到该 chapter 顶部（用 getBoundingClientRect，比 offsetTop 准）
+        const sidebar = sidebarChapter.closest('.sidebar');
+        if (sidebar) {
+          const linkRect = sidebarChapter.getBoundingClientRect();
+          const sideRect = sidebar.getBoundingClientRect();
+          const relTop = linkRect.top - sideRect.top;
+          // 仅当 chapter 标题在 sidebar 视口外才滚
+          if (relTop < 0 || relTop > sidebar.clientHeight) {
+            const desiredScrollTop =
+              linkRect.top - sideRect.top + sidebar.scrollTop - 16;
+            sidebar.scrollTop = Math.max(0, desiredScrollTop);
+          }
+        }
+      }
+    }
+
+    // 右侧 TOC：精细到 h2/h3/h4
+    let activeItem = null;
+    const allHeadings = document.querySelectorAll('.main h2[id], .main h3[id], .main h4[id]');
+    for (const h of allHeadings) {
+      if (h.offsetTop <= scrollY) activeItem = h;
+      else break;
+    }
+
+    // 左侧 sidebar：只到 h2（因为 sidebar 没 h3+，下钻到 h3 会找不到对应元素）
+    let activeH2 = null;
+    const mainH2s = document.querySelectorAll('.main h2[id]');
+    for (const h of mainH2s) {
+      if (h.offsetTop <= scrollY) activeH2 = h;
+      else break;
+    }
+
+    // 右侧 TOC 高亮 + 滚动 chapter
+    tocLinks.forEach(link => link.classList.remove('active'));
+    if (activeItem) {
+      const tocActiveLink = document.querySelector(
+        '.toc-aside a[data-toc-link="' + activeItem.id + '"]'
+      );
+      if (tocActiveLink) tocActiveLink.classList.add('active');
+    }
+
+    // 左侧 sidebar 高亮 + 滚动到 active h2（保证 sidebar 永远有匹配元素）
+    sidebarNavLinks.forEach(link => link.classList.remove('active'));
+    if (activeH2) {
+      const targetHref = '#' + activeH2.id;
+      const sidebarActiveLinks = document.querySelectorAll(
+        '.sidebar .nav-item[href="' + targetHref + '"]'
+      );
+      sidebarActiveLinks.forEach(link => link.classList.add('active'));
+
+      // 让 sidebar 内 active h2 贴顶
+      const activeSidebarLink = sidebarActiveLinks[0];
+      if (activeSidebarLink && !activeSidebarLink.classList.contains('chapter')) {
+        const sidebar = activeSidebarLink.closest('.sidebar');
+        if (sidebar) {
+          const linkRect = activeSidebarLink.getBoundingClientRect();
+          const sideRect = sidebar.getBoundingClientRect();
+          const relTop = linkRect.top - sideRect.top;
+          if (relTop < 16 || relTop > sidebar.clientHeight - 40) {
+            const desiredScrollTop =
+              linkRect.top - sideRect.top + sidebar.scrollTop - 16;
+            sidebar.scrollTop = Math.max(0, desiredScrollTop);
+          }
+        }
+      }
+    }
+  }
+
+  window.addEventListener('scroll', updateTocVisibility, { passive: true });
+  window.addEventListener('resize', updateTocVisibility);
+  updateTocVisibility(); // 初始化
+}
+</script>
+</body>
+</html>

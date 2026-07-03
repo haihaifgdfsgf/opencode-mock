@@ -1,0 +1,16 @@
+{
+  "name": "opencode-mock",
+  "version": "1.0.0",
+  "description": "模拟 OpenCode 多 Agent 协作流程",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "docs": "node tools/md-to-html.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "marked": "^18.0.5"
+  }
+}

@@ -1,0 +1,533 @@
+/* ============================================================================
+ * wiki.css — OpenCode-Mock Wiki 专用样式（冻结版，永不漂移）
+ * ============================================================================
+ *
+ * 【使用规范】
+ *   - 此文件是 Markdown → HTML 转换工具加载的唯一样式
+ *   - 严禁让 LLM 重新"创作"样式
+ *   - 只有当整体风格升级时才能修改（比如把深色换成浅色）
+ *
+ * 【修改后果】
+ *   修改此文件会改变所有由 tools/md-to-html.js 生成的 HTML 外观。
+ *   这是设计目的：保证多次转换的样式一致性。
+ * ============================================================================
+ */
+
+:root {
+  --bg: #0f1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent2: #79c0ff;
+  --green: #3fb950;
+  --green-bg: rgba(63, 185, 80, 0.1);
+  --orange: #d29922;
+  --red: #f85149;
+  --purple: #d2a8ff;
+  --code-bg: #161b22;
+  --code-text: #e6edf3;
+  --radius: 8px;
+  --sidebar-width: 260px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ─── Sidebar ─── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  padding: 24px 0;
+}
+
+.sidebar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0 20px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.nav-group { margin-bottom: 20px; }
+
+.nav-group-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0 20px;
+  margin-bottom: 4px;
+}
+
+.nav-item {
+  display: block;
+  padding: 6px 20px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.nav-item:hover, .nav-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: rgba(88, 166, 255, 0.06);
+}
+
+.nav-item.chapter { font-weight: 600; color: var(--text); margin-top: 8px; }
+
+/* 当前章节（scroll-spy 决定）：加左侧蓝色条 + 强调 */
+.nav-item.chapter.current-chapter {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-bg, rgba(59, 130, 246, 0.06));
+}
+
+/* ─── Main ─── */
+.main {
+  margin-left: var(--sidebar-width);
+  padding: 40px 60px 80px;
+  max-width: 860px;
+}
+
+/* ─── Right-side TOC（右侧浮动目录） ─── */
+.toc-aside {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 240px;
+  height: 100vh;
+  padding: 40px 24px 40px 20px;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.toc-aside::-webkit-scrollbar { width: 4px; }
+.toc-aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.toc-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-left: 12px;
+}
+
+.toc-aside a {
+  display: block;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 5px 0 5px 12px;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  word-break: break-word;
+}
+.toc-aside a:hover { color: var(--text); }
+.toc-aside a.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+/* 层级缩进 */
+.toc-aside .lvl-2 { padding-left: 12px; }
+.toc-aside .lvl-3 { padding-left: 24px; font-size: 12.5px; }
+.toc-aside .lvl-4 { padding-left: 36px; font-size: 12px; }
+
+/* chapter 标题样式（h2 的"小章节"用粗体区分） */
+.toc-aside .lvl-2.is-chapter { font-weight: 600; color: var(--text); margin-top: 10px; }
+
+/* ─── Hero ─── */
+.hero {
+  text-align: center;
+  padding: 60px 40px;
+  margin-bottom: 40px;
+  background: linear-gradient(135deg, #161b22 0%, #1a2332 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.hero h1 {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #58a6ff, #79c0ff, #d2a8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ─── TOC ─── */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 40px;
+}
+
+.toc-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.toc table { width: 100%; border-collapse: collapse; }
+.toc th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+.toc td { padding: 8px 8px; font-size: 14px; }
+.toc td:first-child { color: var(--accent); font-weight: 600; }
+.toc td:last-child { color: var(--text-muted); font-size: 13px; }
+.toc a { color: var(--accent); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+.toc tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+/* ─── Content ─── */
+h1, h2, h3, h4 {
+  color: var(--text);
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 28px;
+  margin: 40px 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+h1:first-of-type { margin-top: 0; }
+h2 {
+  font-size: 22px;
+  margin: 32px 0 14px;
+  color: var(--accent2);
+}
+h3 { font-size: 17px; margin: 24px 0 10px; color: var(--text); }
+h4 { font-size: 15px; margin: 18px 0 8px; }
+
+h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px; height: 18px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-right: 10px;
+  vertical-align: -3px;
+}
+
+/* chapter-title 容器是脚本注入的额外 div，不依赖 h1::before */
+.chapter-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 48px 0 20px;
+}
+.chapter-title h1 { margin: 0; border: none; padding: 0; }
+.chapter-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(88, 166, 255, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+p { margin: 10px 0; }
+
+strong { color: #fff; font-weight: 600; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ─── Blockquote ─── */
+blockquote {
+  border-left: 3px solid var(--accent);
+  background: rgba(88, 166, 255, 0.06);
+  margin: 16px 0;
+  padding: 12px 20px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-muted);
+}
+
+blockquote p { margin: 0; }
+blockquote strong { color: var(--accent); }
+
+/* ─── Lists ─── */
+ul, ol {
+  margin: 10px 0 10px 24px;
+}
+
+li { margin: 4px 0; }
+li ul, li ol { margin-top: 4px; }
+
+/* ─── Tables ─── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+td {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+/* ─── Code ─── */
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 13px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #e6edf3;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 16px 0;
+  position: relative;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--code-text);
+}
+
+/* highlight.js GitHub Dark 主题（冻结，避免漂移） */
+.hljs { color: #c9d1d9; background: var(--code-bg); }
+.hljs-comment, .hljs-quote { color: #8b949e; font-style: italic; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #ff7b72; }
+.hljs-string, .hljs-attr { color: #a5d6ff; }
+.hljs-number, .hljs-built_in, .hljs-builtin-name { color: #79c0ff; }
+.hljs-title, .hljs-function, .hljs-class .hljs-title { color: #d2a8ff; }
+.hljs-tag, .hljs-name, .hljs-attribute { color: #7ee787; }
+.hljs-variable, .hljs-template-variable, .hljs-type { color: #ffa657; }
+.hljs-regexp, .hljs-deletion { color: #ffa198; }
+.hljs-addition { color: #7ee787; }
+.hljs-meta { color: #8b949e; }
+
+/* ─── Ascii-art 块（Markdown 中用 ```ascii 标记） ─── */
+pre.ascii-art {
+  background: #0d1117;
+  font-size: 12px;
+  line-height: 1.5;
+}
+pre.ascii-art code { color: #79c0ff; background: transparent; border: none; padding: 0; }
+
+/* ─── Callout（blockquote 内置 emoji 前缀自动识别） ─── */
+.callout {
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  margin: 16px 0;
+  border: 1px solid;
+}
+
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+
+.callout-info {
+  background: rgba(88, 166, 255, 0.08);
+  border-color: rgba(88, 166, 255, 0.3);
+}
+.callout-warning {
+  background: rgba(210, 168, 34, 0.08);
+  border-color: rgba(210, 168, 34, 0.3);
+}
+.callout-success {
+  background: rgba(63, 185, 80, 0.08);
+  border-color: rgba(63, 185, 80, 0.3);
+}
+
+.callout-icon { margin-right: 8px; }
+
+/* ─── Tags / Badges ─── */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.tag-new { background: rgba(63, 185, 80, 0.15); color: var(--green); border: 1px solid rgba(63, 185, 80, 0.3); }
+.tag-star { background: rgba(210, 168, 34, 0.15); color: var(--orange); border: 1px solid rgba(210, 168, 34, 0.3); }
+.tag-old { background: rgba(248, 81, 73, 0.1); color: var(--red); border: 1px solid rgba(248, 81, 73, 0.25); }
+
+/* ─── Summary box ─── */
+.summary-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.summary-box h4 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.summary-box ul { margin-left: 20px; }
+
+/* ─── Experiment card ─── */
+.experiment-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+
+.experiment-card h3 {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ─── Footer ─── */
+.footer {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+}
+
+.footer p { margin: 6px 0; }
+
+/* ─── Responsive ─── */
+@media (max-width: 1400px) {
+  /* 屏不够宽：隐藏右侧 TOC，正文占满右侧剩余空间 */
+  .toc-aside { display: none; }
+}
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 20px; }
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Progress bar ─── */
+.progress-bar {
+  position: fixed;
+  top: 0; left: var(--sidebar-width); right: 0;
+  height: 2px;
+  background: var(--border);
+  z-index: 200;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  width: 0%;
+  transition: width 0.1s;
+}
+
+/* ─── Highlight current section ─── */
+:target {
+  animation: highlight 1.5s ease-out;
+}
+
+@keyframes highlight {
+  0% { background: rgba(88, 166, 255, 0.2); }
+  100% { background: transparent; }
+}
+
+/* ─── Image ─── */
+img { max-width: 100%; height: auto; border-radius: var(--radius); }
